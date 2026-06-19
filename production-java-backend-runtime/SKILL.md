@@ -1,6 +1,6 @@
 ---
 name: production-java-backend-runtime
-description: Use this skill when building, modifying, reviewing, debugging, or testing production Java backend services, especially Spring Boot services, REST/gRPC APIs, messaging/event-driven flows, persistence, transactions, migrations, microservice contracts, observability, security, resilience, Docker/container behavior, or Kubernetes runtime-facing changes. Use it for codebases that require maintainable, testable, production-safe backend changes with bounded improvement of touched code.
+description: Use this skill when building, modifying, reviewing, debugging, or testing production Java backend services, especially Spring Boot services, REST/gRPC APIs, messaging/event-driven flows, persistence, transactions, migrations, microservice contracts, observability, security, resilience, performance/load-sensitive paths, Docker/container behavior, or Kubernetes runtime-facing changes. Use it for codebases that require maintainable, testable, production-safe backend changes with bounded improvement of touched code.
 ---
 
 # Production Java Backend Runtime Skill
@@ -21,7 +21,7 @@ Use this skill for tasks involving:
 - Microservice contracts, backward compatibility, idempotency, retries, timeouts, or distributed consistency.
 - Observability: logs, metrics, traces, correlation IDs, health endpoints, diagnostics.
 - Security: authn/authz, tenancy, object ownership, confidential data, sensitive data, runtime privileges.
-- Runtime-facing artifacts: Dockerfile, Helm, Kustomize, Kubernetes YAML, probes, resources, env/config.
+- Runtime-facing artifacts: Dockerfile, Helm, Kustomize, Kubernetes YAML, probes, resources, env/config/secrets.
 - Performance/load-sensitive changes: hot paths, high-throughput endpoints, large datasets, query shape, caching, serialization, concurrency, resource limits, JVM memory/GC, or SLO/cost impact.
 - Code review, debugging, refactoring, or tests in a Java backend repository.
 
@@ -41,14 +41,14 @@ Do not use this skill as the primary guide for frontend, mobile, data science, g
 
 4. Small vertical slices over broad rewrites.
    Implement one coherent behavior at a time.
-   Avoid horizontal “all structure first, all logic later” changes.
+   Avoid horizontal "all structure first, all logic later" changes.
 
 5. Deep modules over shallow pass-through layers.
    Prefer small, stable interfaces with meaningful behavior behind them.
    Do not introduce abstractions until there is real variation, leverage, or locality.
 
 6. Domain language over technical noise.
-   Use the project’s domain language in names, tests, APIs, events, docs, and summaries.
+   Use the project's domain language in names, tests, APIs, events, docs, and summaries.
    Challenge vague or overloaded terms.
 
 7. Production safety over local convenience.
@@ -228,7 +228,7 @@ Do not load every reference by default. Load only what the task touches.
   - Module/package boundaries, dependency direction, domain logic placement, ports/adapters, refactoring, architectural cleanup.
 
 - `references/kubernetes-container-runtime.md`
-  - Dockerfile, Helm, Kustomize, Kubernetes YAML, probes, resources, security context, env/config, ports, init jobs, deployment behavior.
+  - Dockerfile, Helm, Kustomize, Kubernetes YAML, probes, resources, security context, env/config/secrets, ports, init jobs, deployment behavior.
 
 - `references/performance-load.md`
   - Hot paths, latency-sensitive APIs, high-throughput endpoints, large datasets, query shape, pagination, batching, caching, serialization, allocation-heavy code, concurrency, pools, consumers, backpressure, resource limits, JVM memory/GC, autoscaling signals, or SLO/cost impact.
