@@ -75,11 +75,11 @@ In existing codebases:
 - Repository owns business decisions.
 - Listener contains policy logic.
 - Domain class depends on Spring, JPA, HTTP, Kafka, or filesystem details.
-- Multiple modules reach into each other’s internals.
+- Multiple modules reach into each other's internals.
 - Cyclic package/module dependencies.
-- “Manager” or “Helper” classes with unclear responsibility.
+- "Manager" or "Helper" classes with unclear responsibility.
 - Shallow service that just delegates without owning behavior.
-- New abstraction added “for future flexibility” without current leverage.
+- New abstraction added "for future flexibility" without current leverage.
 
 ## Verification
 
