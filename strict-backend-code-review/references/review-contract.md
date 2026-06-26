@@ -126,6 +126,10 @@ Invalid evidence includes:
 - style preference;
 - speculative production impact without realistic changed-surface path.
 
+If evidence is incomplete but merge-relevant, use Risk hypothesis or Question.
+
+If evidence is weak and non-blocking, omit the issue or move it to Non-blocking.
+
 ## Required change
 
 Required change must be:
