@@ -1,6 +1,6 @@
 ---
 name: strict-backend-code-review
-description: Use for review-only Java/Spring backend PR or code-diff review. Apply merge-gate review: changed surface, negative space, evidence gate, false-positive challenge, deterministic verdict, and concise findings. Does not implement fixes or duplicate CI/linter/formatter output.
+description: Use for review-only Java/Spring backend PR or code-diff review. Apply merge-gate review for correctness, architecture/DDD, API/data compatibility, security/privacy, Kubernetes/runtime readiness, resilience, tests, and maintainability using changed surface, negative space, evidence gate, false-positive challenge, and deterministic verdict. Does not implement fixes or duplicate CI/linter/formatter output.
 version: 0.1.0
 ---
 
@@ -60,6 +60,20 @@ Do not print coverage unless audit mode is requested.
 
 Mark review partial if missing context or foundational blockers make important verification unreliable.
 
+## Context budget
+
+Do not inspect the entire repository by default.
+
+Context priority:
+1. PR intent artifacts.
+2. Changed files and surrounding code.
+3. Direct callers/callees, interfaces, tests, and configs.
+4. Affected contracts, migrations, security rules, and runtime manifests.
+5. Repo-local instructions for the touched module.
+6. Broader search only for a concrete risk hypothesis.
+
+Stop expanding context when the risk is verified, disproven, not applicable, or remaining uncertainty should become a Question / partial review note.
+
 ## Reference routing
 
 Do not load every reference by default.
@@ -73,7 +87,7 @@ Load only when relevant:
 - `references/review-contract.md` — finding fields, severity, confidence, verdict, output format, audit mode, self-check.
 - `references/examples.md` — output examples only.
 
-Load `references/review-contract.md` before producing a non-clean review, audit output, or any review where severity, confidence, finding type, verdict, or output format is ambiguous.
+Load `references/review-contract.md` before producing any non-clean review, audit output, or when checking whether a finding should affect verdict.
 
 ## Repo-local priority
 
