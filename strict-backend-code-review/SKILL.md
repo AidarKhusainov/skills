@@ -1,69 +1,81 @@
 ---
 name: strict-backend-code-review
-description: Use for review-only analysis of Java/Spring backend pull requests or code diffs. Produces concise, evidence-based findings focused on correctness, Clean Architecture, DDD, API/data compatibility, security/privacy, Kubernetes/runtime readiness, resilience, tests, and maintainability. Does not implement features, apply patches, or duplicate CI/linter/formatter output.
+description: Use for review-only Java/Spring backend PR or code-diff review. Apply merge-gate review: changed surface, negative space, evidence gate, false-positive challenge, deterministic verdict, and concise findings. Does not implement fixes or duplicate CI/linter/formatter output.
 version: 0.1.0
 ---
 
 # Strict Backend Code Review
 
-## Purpose
+This skill is a merge-gate reviewer for Java/Spring backend PRs and code diffs.
 
-Review Java/Spring backend pull requests and code diffs.
-
-Output concise, evidence-based, actionable findings.
-
-Use plain text by default.
+Output only evidence-based findings that affect safe merge, maintainability of the changed path, or meaningful review follow-up.
 
 Do not modify code or produce a full implementation unless the user explicitly asks for a patch after the review.
 
-Suggested code is optional. Include it only when the fix is small, local, precise, and non-speculative.
+## Leading concepts
+
+Changed surface:
+Everything touched or implied by PR intent: production code, tests, APIs, DTOs, schemas, events, domain rules, persistence, migrations, config, runtime artifacts, integrations, security, observability, and missing supporting changes.
+
+Negative space:
+Required code, tests, contracts, configs, manifests, migrations, docs, or operational artifacts that should have changed but did not.
+
+Evidence gate:
+No finding survives without concrete, checkable evidence tied to changed surface.
+
+False-positive challenge:
+Before reporting CRITICAL, HIGH, or MEDIUM, try to disprove the finding using existing code, tests, config, framework behavior, deployment setup, and repo-local convention.
+
+Merge gate:
+Verdict is derived mechanically from surviving findings.
 
 ## Modes
 
 Default: Standard review.
 
-Standard review:
-- Use one reviewer and this core workflow.
-
 Parallel deep review:
-- Use only when explicitly requested or when the PR is large, high-risk, multi-domain, and the host supports subagents.
-- Split subagents by risk area.
-- Parent reviewer must deduplicate and produce one final review.
+Use only when explicitly requested or when the PR is large, high-risk, multi-domain, and the host supports subagents. Split subagents by risk area. Parent reviewer must deduplicate and produce one final review.
 
 Audit mode:
-- Use only when explicitly requested.
-- Output normal review first, then a compact coverage matrix.
-- Do not print coverage by default.
+Use only when explicitly requested. Output normal review first, then compact coverage matrix. Do not print coverage by default.
 
-## Core workflow
-
-Follow this order internally:
+## Workflow
 
 1. Read PR title, description, linked ticket, ADR/design note, acceptance criteria, rollout notes, and repo-local instructions when available.
 2. Extract intent, scope, constraints, expected behavior, and risk surface.
-3. Build a changed surface map and check negative space.
-4. Load only reference files relevant to changed surface or a concrete risk hypothesis.
-5. Inspect repository context only to prove or disprove concrete risks.
-6. Review applicable dimensions.
-7. Group findings by root cause.
-8. Run false-positive challenge for every CRITICAL, HIGH, and MEDIUM finding.
-9. Assign severity, confidence, fix timing, and category.
-10. Derive verdict mechanically.
-11. Run final self-check.
-12. Output only useful review content.
+3. Build changed surface.
+4. Check negative space.
+5. Load only relevant references.
+6. Inspect repository context only to prove or disprove concrete risks.
+7. Apply evidence gate.
+8. Group findings by root cause.
+9. Apply false-positive challenge to CRITICAL/HIGH/MEDIUM.
+10. Derive verdict.
+11. Output the review.
 
-Internally track coverage for applicable dimensions using:
-- Checked
-- Not applicable
-- Finding
-- Question
-- Not fully reviewable
+Completion criterion:
+Every applicable changed-surface branch is Checked, Not applicable, Finding, Question, or Not fully reviewable.
 
-Print coverage only in audit mode.
+Do not print coverage unless audit mode is requested.
 
-Mark the review partial when important merge-risk context is missing or foundational blockers make verification unreliable.
+Mark review partial if missing context or foundational blockers make important verification unreliable.
 
-## Repo-local instructions
+## Reference routing
+
+Do not load every reference by default.
+
+Load only when relevant:
+- `references/architecture-domain.md` — architecture, DDD, boundaries, aggregates, invariants, use cases.
+- `references/api-data-rollout.md` — APIs, DTOs, events, serialization, persistence, transactions, migrations, rollout/rollback.
+- `references/security-privacy-observability.md` — authn/authz, tenant isolation, secrets, PII, audit, logs, metrics, traces.
+- `references/runtime-resilience-concurrency.md` — Kubernetes, probes, shutdown, external calls, retries, idempotency, locking, races.
+- `references/java-spring-testing-maintainability.md` — Java, Spring, JPA, validation, transactions, Jackson, tests, readability, simplicity.
+- `references/review-contract.md` — finding fields, severity, confidence, verdict, output format, audit mode, self-check.
+- `references/examples.md` — output examples only.
+
+Load `references/review-contract.md` before producing a non-clean review, audit output, or any review where severity, confidence, finding type, verdict, or output format is ambiguous.
+
+## Repo-local priority
 
 Apply repo-local instructions before generic best practices.
 
@@ -76,51 +88,19 @@ Priority:
 
 Follow repo-local instructions unless they create correctness, security, data, compatibility, or production-runtime risk.
 
-Treat a pattern as a project convention only when it is documented, repeated in recent local code, required by framework/runtime constraints, or needed for compatibility.
+Treat a pattern as project convention only when documented, repeated in recent local code, required by framework/runtime constraints, or needed for compatibility.
 
 Do not preserve accidental legacy patterns merely for consistency.
 
 If the PR changes or replaces a documented architectural convention, require ADR, design note, updated architecture docs, migration plan, compatibility plan, or clear scope boundary.
 
-## Changed surface and context budget
-
-Always identify touched and implied surfaces before detailed review.
-
-Changed surface includes production code, tests, APIs, DTOs, schemas, events, domain model, persistence, transactions, migrations, security boundaries, config, Kubernetes/runtime artifacts, consumers/jobs, integrations, observability, and missing implied changes.
-
-Check negative space: required code, contracts, tests, configs, docs, manifests, migrations, or operational artifacts that should have changed but did not.
-
-Do not inspect the entire repository by default.
-
-Context priority:
-1. PR intent artifacts.
-2. Changed files and surrounding code.
-3. Direct callers/callees, interfaces, tests, and configs.
-4. Affected contracts, migrations, security rules, and runtime manifests.
-5. Repo-local instructions relevant to the touched module.
-6. Broader search only for a concrete risk hypothesis.
-
-Stop expanding context when the risk is verified, disproven, not applicable, or remaining uncertainty should become a Question / partial review note.
-
-## References
-
-Do not load every reference by default.
-
-Load only when relevant:
-- `references/architecture-domain.md` — Clean Architecture, DDD, boundaries, aggregates, invariants, use cases.
-- `references/api-data-rollout.md` — APIs, DTOs, events, serialization, persistence, transactions, migrations, rollout/rollback.
-- `references/security-privacy-observability.md` — authn/authz, tenant isolation, secrets, PII, audit, logs, metrics, traces.
-- `references/runtime-resilience-concurrency.md` — Kubernetes, probes, shutdown, external calls, retries, idempotency, locking, races.
-- `references/java-spring-testing-maintainability.md` — Java, Spring, JPA, validation, transactions, Jackson, tests, readability, simplicity.
-- `references/examples.md` — output examples only.
-
-## Review scope
+## Scope gates
 
 Report only issues introduced, exposed, depended on, implied, or materially amplified by the PR.
 
 Do not review unrelated legacy code.
 
-Apply Boy Scout cleanup only to touched or directly adjacent code when needed to make changed behavior understandable, testable, safe, or maintainable.
+Apply Boy Scout cleanup only to touched or directly adjacent code when needed for understandability, testability, safety, or maintainability.
 
 Do not demand broad cleanup outside the changed area unless the PR cannot be made safe without it.
 
@@ -128,147 +108,69 @@ Do not report PR size, mixed scope, or lack of atomicity as a standalone finding
 
 If mixed scope creates correctness, security, data, rollout, or architecture risk, report the concrete underlying risk under the relevant category.
 
-Do not duplicate CI/linter/formatter/static-analysis/dependency-scanner output unless it reveals a non-obvious root cause worth reviewing.
+Do not duplicate CI/linter/formatter/static-analysis/dependency-scanner output unless it reveals a non-obvious review root cause.
 
-Ignore mechanical formatting/style issues handled by tools.
+Ignore mechanical style handled by tools.
 
 Review naming, readability, and simplicity only when they affect domain intent, architecture, API semantics, security meaning, transaction/idempotency meaning, testability, or maintainability.
 
-## Finding standard
+## Finding rules
 
-Every finding must be concrete, checkable, tied to changed surface, supported by evidence, actionable, and grouped by root cause.
-
-Every finding must include:
-- severity;
-- finding type;
-- confidence;
-- location;
-- problem;
-- evidence;
-- required change;
-- fix timing;
-- tests;
-- category.
+Report every actionable, non-duplicate finding that survives scope gates, evidence gate, and false-positive challenge.
 
 Do not cap findings by count.
 
-Report every actionable, non-duplicate finding that survives evidence, scope, and false-positive checks.
+One root cause = one finding, even if it appears in multiple locations.
 
-Do not add a separate Impact field by default; include impact inside Problem.
+Every finding must have severity, type, confidence, location, problem, evidence, required change, fix timing, tests, and category.
 
-Do not report preference-only blockers, generic best-practice violations without changed-surface evidence, verified findings without concrete evidence, or speculative production impact without a realistic path.
+Do not add a separate Impact field. Put impact inside Problem.
 
-If evidence is incomplete but merge-relevant, use Risk hypothesis or Question.
+Use:
+- Verified finding when evidence directly proves the issue.
+- Risk hypothesis when risk is merge-relevant but not fully proven.
+- Question when the answer can change merge readiness.
 
-If evidence is weak and non-blocking, omit it or move it to Non-blocking.
-
-## Evidence, severity, and confidence
-
-Evidence must be concrete, checkable, and tied to changed surface.
-
-Valid evidence includes local code/config/test references, observed control/data flow, missing required artifacts, repo-local convention, applicable framework/runtime behavior, or realistic rollout/retry/concurrency/failure scenario.
-
-Invalid evidence includes vague impressions, generic best practices, unproven architecture claims, or risk without realistic changed-surface path.
-
-Assign severity after evidence.
-
-Severity values:
-- CRITICAL
-- HIGH
-- MEDIUM
-- LOW
-- NIT
-
-Severity must follow impact, likelihood, and confidence.
-
-CRITICAL/HIGH require strong evidence and cannot have low confidence.
-
-Finding type:
-- Verified finding — evidence directly supports the issue.
-- Risk hypothesis — plausible merge-relevant risk not fully proven.
-- Question — missing answer can change verdict, severity, required change, fix timing, or verification status.
-
-If missing information blocks confidence in correctness, security, data safety, API compatibility, rollout safety, or architecture, represent it as a Question finding with `Fix timing: Must fix in this PR`.
-
-Do not ask curiosity questions.
-
-## False-positive challenge
-
-Before reporting any CRITICAL, HIGH, or MEDIUM finding, try to disprove it.
-
-Check whether existing code, tests, configuration, constraints, framework behavior, deployment setup, or repo-local conventions already mitigate the risk.
-
-Remove, downgrade, convert to Question/Risk hypothesis, or move to Non-blocking when the finding does not survive this challenge.
+If missing information blocks confidence in correctness, security, data safety, API compatibility, rollout safety, or architecture, report it as a Question finding with `Fix timing: Must fix in this PR`.
 
 ## Required change and tests
 
-Required change must be proportional, local when possible, root-cause oriented, observable, and sufficient for safe merge.
+Required change must be observable, proportional, root-cause oriented, and sufficient for safe merge.
 
 Do not always ask for the smallest patch.
 
-Do not propose multiple alternatives without a preferred direction or clear selection criterion.
+Do not list alternatives without a preferred option or clear selection criterion.
 
-If broad redesign is required, state why local change is insufficient.
+Suggested code is optional and must be local, precise, short, and non-speculative.
 
-Tests must specify behavior/risk, test level, scenario, and expected observable result.
+Tests must name behavior/risk, test level, scenario, and expected observable result.
 
-Do not write generic test requests such as `Add tests`, `Increase coverage`, or `Add unit tests`.
+Prefer black-box behavior tests through public use-case, API, contract, consumer, or integration boundaries when practical.
 
-Prefer behavior/risk-oriented tests through public use-case, API, contract, consumer, or integration boundaries when practical.
+Do not write generic test requests such as `Add tests`.
 
-Use implementation-detail tests only when the implementation detail is the contract or risk boundary.
+`Tests: Not required` needs a concrete reason and is almost never acceptable for correctness, security, data, API, runtime, transaction, migration, concurrency, idempotency, or rollout findings.
 
-`Tests: Not required` is allowed only with a concrete reason and is almost never acceptable for correctness, security, data, API, runtime, transaction, migration, concurrency, idempotency, or rollout findings.
-
-Do not create a separate missing-tests finding when the test gap belongs to another production-code finding.
-
-## Categories
-
-Use only these categories:
-- Intent
-- Architecture
-- Domain
-- API Contract
-- Security
-- Privacy
-- Data
-- Rollout / Compatibility
-- Kubernetes / Runtime
-- Resilience
-- Concurrency
-- Observability
-- Tests
-- Maintainability
-- Configuration
-- Java / Spring
-
-Do not invent categories.
-
-Subcategory is optional, short, and technical.
-
-If several categories apply, choose the primary merge risk.
+Do not create a separate missing-tests finding when the test gap belongs to another finding.
 
 ## Verdict
 
-Verdict values:
-- APPROVE
-- COMMENT_ONLY
-- REQUEST_CHANGES
+REQUEST_CHANGES:
+Any CRITICAL/HIGH/MEDIUM finding with `Fix timing: Must fix in this PR`.
 
-Derive verdict mechanically:
-- REQUEST_CHANGES: any CRITICAL/HIGH/MEDIUM finding with `Fix timing: Must fix in this PR`.
-- COMMENT_ONLY: only LOW/NIT findings, Optional items, or Can be follow-up items.
-- APPROVE: no findings, no merge-relevant questions, no useful non-blocking items.
+COMMENT_ONLY:
+Only LOW/NIT findings, Optional items, or Can be follow-up items.
+
+APPROVE:
+No findings, no merge-relevant questions, no useful non-blocking items.
 
 Do not APPROVE with unresolved merge-relevant questions.
 
-Do not REQUEST_CHANGES for optional cleanup, preferences, NITs, or follow-up items.
+Do not REQUEST_CHANGES for preferences, NITs, optional cleanup, or follow-up-only items.
 
 `Highest severity` must equal the highest reported severity.
 
-Use `Highest severity: NONE` only when there are no findings, questions, or non-blocking items.
-
-## Output format
+## Output
 
 Clean approve:
 
@@ -287,7 +189,7 @@ Review completeness: partial
 Reason: <only if partial>
 
 Summary:
-<Only if needed. Omit for clean APPROVE. 1-3 sentences maximum.>
+<omit for clean APPROVE; 1-3 sentences max>
 
 Findings:
 1. [SEVERITY][Verified finding | Risk hypothesis | Question][confidence]
@@ -310,48 +212,18 @@ Non-blocking:
 
 Omit empty sections.
 
-Omit Summary for clean APPROVE.
+Do not output praise, positive notes, generic advice, process commentary, or ritual sections.
 
-Omit Review completeness unless partial.
+## Self-check
 
-Do not output positive notes, praise, generic advice, process commentary, or empty ritual sections.
-
-Do not repeat every finding in Summary.
-
-## Audit mode output
-
-When audit mode is requested, output normal review first, then compact coverage matrix.
-
-Coverage statuses:
-- Checked
-- Not applicable
-- Finding
-- Question
-- Not fully reviewable
-
-Reference existing finding numbers.
-
-Do not create duplicate findings from the matrix.
-
-## Final self-check
-
-Before final output, verify:
+Before returning:
 - verdict and highest severity match findings;
-- APPROVE has no unresolved merge-relevant questions;
-- REQUEST_CHANGES is not used only for LOW/NIT/Optional/follow-up items;
-- every CRITICAL/HIGH/MEDIUM finding has type, confidence, evidence, required change, fix timing, tests, and category;
-- no HIGH/CRITICAL finding has low confidence;
-- every Verified finding has concrete evidence;
-- every Risk hypothesis states uncertainty;
+- CRITICAL/HIGH/MEDIUM findings have evidence, required change, fix timing, tests, category, type, and confidence;
+- no HIGH/CRITICAL has low confidence;
 - every Question affects merge readiness;
-- every Required change is proportional, observable, and root-cause oriented;
-- every Tests field is concrete or `Not required` with a concrete reason;
-- category is from the closed list;
-- same-root-cause findings are grouped;
+- Required change is observable and root-cause oriented;
+- Tests are concrete or explicitly not required with reason;
+- findings are deduplicated by root cause;
 - no finding duplicates CI/linter/formatter output;
 - no unrelated legacy issue is reported;
-- no positive notes, generic advice, process commentary, or empty ritual sections are present;
-- Summary is omitted for clean APPROVE;
-- Review completeness is omitted unless partial.
-
-Fix inconsistencies before returning the review.
+- clean APPROVE has no Summary.
