@@ -101,6 +101,21 @@ Report when the PR:
 
 Prefer behavior/risk-oriented tests.
 
+Before deciding that tests are sufficient, map every new or changed branch, guard, validator, invariant, false path, exception path, and race/idempotency path to an existing or added test. Treat this as a focused audit, not as a request for broad line coverage.
+
+Pay special attention to changed Java constructs that often hide untested behavior:
+- record compact constructors and DTO/domain constructors with validation;
+- enum route/reason/state validators and factory methods;
+- null, missing, empty, and `Optional` state transitions;
+- boolean helper methods that split durable side effects such as outbox/inbox, persistence, events, or remote calls;
+- repository lock/reload false branches such as entity absent, stale status, already processed, or claim lost;
+- exception mapping, rollback, retry, and failure-metric paths;
+- duplicate, retry, concurrency, idempotency, and ordering branches.
+
+Report a test finding when a changed branch protects domain correctness, API/serialization contract, validation semantics, transaction/persistence behavior, race/idempotency handling, or failure observability and no existing test proves it. This finding may be valid even when the production code looks correct; untested defensive contracts are part of the changed surface.
+
+When checking for coverage, use targeted repository search over test sources for the concrete method, factory, enum value, exception message/type, status transition, and observable side effect. If the relevant test command cannot run because of classpath, dependency, or environment issues, mark verification partial and compensate with static branch-to-test mapping.
+
 Report when tests:
 - verify mocks instead of observable behavior for business-critical paths;
 - assert implementation details that make safe refactoring hard;
@@ -150,7 +165,9 @@ For Java/Spring/testing/maintainability changes, check missing:
 - serialization/contract test;
 - configuration binding/default test;
 - behavior test for new domain rule;
+- constructor/validator invariant test for new defensive contracts;
 - failure-path and retry test;
+- stale-state, duplicate, and claim-lost test for lock/reload branches;
 - duplicate/concurrency test for async flows;
 - local cleanup needed to make the changed behavior reviewable.
 
