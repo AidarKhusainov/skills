@@ -47,7 +47,7 @@ Use only when explicitly requested. Output normal review first, then compact cov
 4. Check negative space.
 5. Load only relevant references.
 6. Inspect repository context only to prove or disprove concrete risks.
-7. Audit changed behavior: map each merge-relevant changed branch, guard, validator, invariant, false/failure, observable, and race/idempotency path to proof: test, finding, question, N/A, or partial note.
+7. Audit changed behavior: map each merge-relevant changed branch, guard, validator, invariant, false/failure path, observable behavior, and race/idempotency path to proof: test, finding, question, N/A, or partial note.
 8. Apply evidence gate.
 9. Group findings by root cause.
 10. Apply false-positive challenge to CRITICAL/HIGH/MEDIUM.
