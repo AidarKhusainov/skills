@@ -47,7 +47,7 @@ Use only when explicitly requested. Output normal review first, then compact cov
 4. Check negative space.
 5. Load only relevant references.
 6. Inspect repository context only to prove or disprove concrete risks.
-7. Perform a focused branch/invariant coverage audit for changed behavior before accepting existing tests as sufficient.
+7. Audit changed behavior: map each merge-relevant new/changed branch, guard, validator, invariant, false/failure path, externally observable behavior, and race/idempotency path to proof: test, finding, question, N/A, or partial note.
 8. Apply evidence gate.
 9. Group findings by root cause.
 10. Apply false-positive challenge to CRITICAL/HIGH/MEDIUM.
@@ -55,7 +55,7 @@ Use only when explicitly requested. Output normal review first, then compact cov
 12. Output the review.
 
 Completion criterion:
-Every applicable changed-surface branch, guard, invariant, false path, exception path, race/idempotency path, and externally observable behavior is Checked, Not applicable, Finding, Question, or Not fully reviewable.
+Changed surface is checked, not applicable, finding, question, or not fully reviewable.
 
 Do not print coverage unless audit mode is requested.
 
@@ -148,7 +148,7 @@ Use:
 
 If missing information blocks confidence in correctness, security, data safety, API compatibility, rollout safety, or architecture, report it as a Question finding with `Fix timing: Must fix in this PR`.
 
-A missing-test finding is valid when the PR adds or changes domain invariants, validators, branching, failure paths, race/idempotency handling, serialization/API contract, or transaction/persistence behavior and no existing test proves the changed behavior. Do not suppress that finding merely because no production bug is proven yet.
+Missing-test findings are valid for changed defensive contracts/invariants when no existing test proves the observable behavior. Attach the gap to the related finding; use a standalone test finding only when the untested contract is itself merge-relevant.
 
 ## Required change and tests
 
@@ -243,5 +243,5 @@ Before returning:
 - findings are deduplicated by root cause;
 - no finding duplicates CI/linter/formatter output;
 - no unrelated legacy issue is reported;
-- every new or changed branch, guard, invariant, false path, exception path, and race/idempotency path was mapped to a test, finding, question, or explicit not-applicable reason;
+- changed guards/invariants/failure/race paths are mapped to proof: test, finding, question, N/A, or partial note;
 - clean APPROVE has no Summary.
