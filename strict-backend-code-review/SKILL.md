@@ -47,7 +47,7 @@ Use only when explicitly requested. Output normal review first, then compact cov
 4. Check negative space.
 5. Load only relevant references.
 6. Inspect repository context only to prove or disprove concrete risks.
-7. Audit changed behavior: map each merge-relevant changed branch, guard, validator, invariant, false/failure path, observable behavior, and race/idempotency path to proof: test, finding, question, N/A, or partial note.
+7. Audit changed behavior: map each merge-relevant changed branch, guard, validator, invariant, false/failure, observable, and race/idempotency path to proof: test, finding, question, N/A, or partial note.
 8. Apply evidence gate.
 9. Group findings by root cause.
 10. Apply false-positive challenge to CRITICAL/HIGH/MEDIUM.
@@ -148,7 +148,7 @@ Use:
 
 If missing information blocks confidence in correctness, security, data safety, API compatibility, rollout safety, or architecture, report it as a Question finding with `Fix timing: Must fix in this PR`.
 
-Missing-test findings are valid for changed defensive contracts/invariants when no existing test proves the observable behavior. Attach the gap to the related finding; use a standalone test finding only when the untested contract is itself merge-relevant.
+Missing-test findings are valid for changed defensive contracts/invariants lacking behavioral proof. Attach to the related finding; stand alone only when the untested contract is merge-relevant.
 
 ## Required change and tests
 
