@@ -107,7 +107,7 @@ Before accepting tests, map changed branches/guards/invariants/failure/race path
 - lock/reload false paths: absent, stale, already processed, claim lost;
 - exception/rollback/retry/failure metrics and duplicate/concurrency/idempotency/ordering.
 
-Report a test finding when such a path protects domain/API/serialization/transaction/persistence/idempotency/failure observability and no test proves observable behavior. Use targeted test-source search for method/factory/enum/status/exception/side effect; if tests cannot run, mark partial and do static mapping.
+Report a test finding when such a path protects domain/API/serialization/transaction/persistence/idempotency/failure observability without behavioral proof. Search tests by method/factory/enum/status/exception/side effect; if tests cannot run, mark partial and map statically.
 
 Report when tests:
 - verify mocks instead of observable behavior for business-critical paths;
