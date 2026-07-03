@@ -47,14 +47,15 @@ Use only when explicitly requested. Output normal review first, then compact cov
 4. Check negative space.
 5. Load only relevant references.
 6. Inspect repository context only to prove or disprove concrete risks.
-7. Apply evidence gate.
-8. Group findings by root cause.
-9. Apply false-positive challenge to CRITICAL/HIGH/MEDIUM.
-10. Derive verdict.
-11. Output the review.
+7. Audit changed behavior: map each merge-relevant changed branch, guard, validator, invariant, false/failure path, observable behavior, and race/idempotency path to proof: test, finding, question, N/A, or partial note.
+8. Apply evidence gate.
+9. Group findings by root cause.
+10. Apply false-positive challenge to CRITICAL/HIGH/MEDIUM.
+11. Derive verdict.
+12. Output the review.
 
 Completion criterion:
-Every applicable changed-surface branch is Checked, Not applicable, Finding, Question, or Not fully reviewable.
+Changed surface is checked, not applicable, finding, question, or not fully reviewable.
 
 Do not print coverage unless audit mode is requested.
 
@@ -146,6 +147,8 @@ Use:
 - Question when the answer can change merge readiness.
 
 If missing information blocks confidence in correctness, security, data safety, API compatibility, rollout safety, or architecture, report it as a Question finding with `Fix timing: Must fix in this PR`.
+
+Missing-test findings are valid for changed defensive contracts/invariants lacking behavioral proof. Attach to the related finding; stand alone only when the untested contract is merge-relevant.
 
 ## Required change and tests
 
@@ -240,4 +243,5 @@ Before returning:
 - findings are deduplicated by root cause;
 - no finding duplicates CI/linter/formatter output;
 - no unrelated legacy issue is reported;
+- changed guards/invariants/failure/race paths are mapped to proof: test, finding, question, N/A, or partial note;
 - clean APPROVE has no Summary.

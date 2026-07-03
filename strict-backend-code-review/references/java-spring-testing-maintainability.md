@@ -101,6 +101,14 @@ Report when the PR:
 
 Prefer behavior/risk-oriented tests.
 
+Before accepting tests, map changed branches/guards/invariants/failure/race paths to proof, not line coverage. Focus on hidden Java behavior:
+- constructors/records/enums/validators and null/missing/empty/`Optional` transitions;
+- side-effect splits: outbox/inbox, persistence, events, remote calls;
+- lock/reload false paths: absent, stale, already processed, claim lost;
+- exception/rollback/retry/failure metrics and duplicate/concurrency/idempotency/ordering.
+
+Report a test finding when such a path protects domain/API/serialization/transaction/persistence/idempotency/failure observability without behavioral proof. Search tests by method/factory/enum/status/exception/side effect; if tests cannot run, mark partial and map statically.
+
 Report when tests:
 - verify mocks instead of observable behavior for business-critical paths;
 - assert implementation details that make safe refactoring hard;
@@ -150,8 +158,9 @@ For Java/Spring/testing/maintainability changes, check missing:
 - serialization/contract test;
 - configuration binding/default test;
 - behavior test for new domain rule;
+- invariant/validator test for changed defensive contract;
 - failure-path and retry test;
-- duplicate/concurrency test for async flows;
+- stale-state/claim-lost/idempotency test for lock/reload or async duplicate flows;
 - local cleanup needed to make the changed behavior reviewable.
 
 ## Findings to avoid
