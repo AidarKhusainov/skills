@@ -13,8 +13,9 @@ Treat machine-readable schemas as public contract inputs unless repo-local conte
 1. List changed operations, schemas, parameters, request bodies, responses, security requirements, and generated interfaces.
 2. Build an operation matrix.
 3. Build a contract-identifier and generator-impact scan.
-4. Cross-check controller/interface behavior, validation, tests, and generated types when present.
-5. Report only findings with concrete contract evidence tied to changed surface.
+4. Classify documented outcomes for changed operations: success, validation/client error, auth/authz failure, not-found/conflict when relevant, server/dependency failure, and async/partial outcome when relevant.
+5. Cross-check controller/interface behavior, validation, tests, and generated types when present.
+6. Report only findings with concrete contract evidence tied to changed surface.
 
 ## Required artifacts
 
@@ -40,6 +41,7 @@ Use this when public or generated identifiers are added, renamed, regenerated, m
 
 Report when the PR:
 - changes externally observed request, response, status, error, security, validation, nullability, required-field, enum, or schema behavior without contract alignment;
+- defines only success outcomes for a changed externally consumed operation that has required inputs, authentication/authorization, persistence writes, external side effects, or realistic failure behavior;
 - changes documented outcome semantics without preserving or explaining affected client-visible behavior;
 - marks inputs as required without corresponding validation/error semantics and tests;
 - changes protected operations without preserving documented or expected security-failure behavior;
@@ -53,6 +55,8 @@ Report when the PR:
 ## Response and outcome guidance
 
 Do not require an exhaustive outcome catalog for every operation.
+
+A success-only response set is not automatically wrong. It becomes merge-relevant when the changed operation exposes a credible contract path for invalid input, denied access, missing/conflicting state, partial completion, dependency failure, or server failure that clients must handle through the machine-readable contract.
 
 Require documented outcomes only when they are part of a credible changed contract path. Use repo-local error-envelope and status conventions when available.
 
