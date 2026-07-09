@@ -37,6 +37,8 @@ referencing object/column(s) -> referenced object/column(s) -> supporting access
 
 Use this to check whether relationship enforcement, lookup paths, locking behavior, and implicit actions are supported by the resulting schema and local database behavior.
 
+A supporting access path must be usable by the local database engine for the referenced relationship path. For composite indexes, verify whether the referencing columns are covered in a usable order; do not assume that any index mentioning the column is sufficient.
+
 ### Schema consistency table
 
 ```text
@@ -48,9 +50,11 @@ Use this for schema elements that have the same semantic role across tables, mod
 ## Checks
 
 Report when the PR:
-- creates semantically equivalent schema elements with inconsistent type, nullability, default, precision, collation, representation semantics, or behavior-changing naming;
+- introduces, exposes, or preserves semantically equivalent schema elements with inconsistent type, nullability, default, precision, collation, representation semantics, or behavior-changing naming;
+- uses inconsistent time, numeric, text/collation, enum/status, identifier, or state-marker representation for the same semantic role across related tables or contract boundaries;
 - adds, moves, or recreates relationships without verifying the supporting physical access path, constraint coverage, or documented local convention;
 - assumes database-specific constraint/index behavior without checking the actual engine or project migration conventions;
+- assumes relationship support exists implicitly when the database engine requires explicit child-side access paths for safe enforcement, lookup, locking, or referential actions;
 - drops or fails to preserve constraints or indexes that represented business invariants in the replaced or split schema;
 - adds NOT NULL, UNIQUE, relationship, CHECK, or default constraints without safe sequencing for existing data;
 - introduces referential actions that conflict with application ownership semantics, retention rules, or business rules;
@@ -64,7 +68,8 @@ Report when the PR:
 For relationship/index findings, name:
 - referencing and referenced objects/columns;
 - existing supporting access path or constraint status;
-- realistic query, write, referential action, or locking path.
+- realistic query, write, referential action, or locking path;
+- database engine behavior or repo-local convention that makes the access path required or unnecessary.
 
 For schema consistency findings, name:
 - semantic element family;
