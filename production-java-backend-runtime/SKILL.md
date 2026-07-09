@@ -171,6 +171,7 @@ Do not guess when the decision changes:
 - security posture, ownership, tenancy, or permissions;
 - irreversible side effects;
 - runtime ownership or deployment sequencing;
+- architecture boundaries, dependency direction, or module ownership;
 - performance/SLO tradeoff.
 
 When blocked by one of these, ask a concise decision question or implement the smallest safe reversible step.
@@ -329,7 +330,7 @@ Before final response, check:
 
 Do not load every reference by default.
 
-Load the corresponding reference for every triggered surface:
+Load the corresponding reference for every non-trivial triggered surface:
 
 - Java source quality -> `references/java-code-quality.md`.
 - Spring framework behavior -> `references/spring-boot.md`.
@@ -343,7 +344,7 @@ Load the corresponding reference for every triggered surface:
 - Kubernetes/container runtime -> `references/kubernetes-container-runtime.md`.
 - Performance/load -> `references/performance-load.md`.
 
-If a surface is triggered but its reference is not loaded, explain why it is not needed.
+For trivial changes, a triggered reference may be skipped only when it would not affect the plan, implementation, verification, or final response. If skipped, briefly note why.
 
 ## Quality gates
 
