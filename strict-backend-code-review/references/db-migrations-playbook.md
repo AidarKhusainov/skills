@@ -1,6 +1,6 @@
 # DB and Migrations Playbook
 
-Load this file when the changed surface touches SQL, DDL, migrations, Liquibase/Flyway, table/index/constraint/FK definitions, persistence schema, or migration rollout/rollback behavior.
+Load this file when the changed surface touches SQL, DDL, migrations, Liquibase/Flyway, table/index/constraint definitions, persistence schema, or migration rollout/rollback behavior.
 
 ## Goal
 
@@ -10,11 +10,11 @@ Treat SQL and migrations as first-class code. Do not reduce this pass to Java pe
 
 ## Required workflow
 
-1. Identify created, altered, split, moved, or removed tables, columns, indexes, constraints, FKs, and referential actions.
+1. Identify created, altered, split, moved, or removed tables, columns, indexes, constraints, relationships, and referential actions.
 2. Build a schema-risk inventory.
-3. Build an FK inventory table when FKs are added, moved, recreated, or materially depended on.
-4. Build a schema consistency table for semantically identical columns.
-5. Check migration order, mixed-version deploy safety, rollback safety, and lock/cascade behavior.
+3. Build a referential-constraint inventory when relationships are added, moved, recreated, or materially depended on.
+4. Build a schema consistency table for semantically equivalent schema elements.
+5. Check migration order, mixed-version deploy safety, rollback safety, and lock/implicit-action behavior.
 6. Report only findings with concrete schema evidence tied to changed surface.
 
 ## Required artifacts
@@ -27,64 +27,62 @@ Build these artifacts internally. Print them only in audit mode or when needed a
 object -> change type -> old invariant -> new invariant -> risk note
 ```
 
-Use for tables, columns, indexes, unique constraints, check constraints, FKs, defaults, and referential actions.
+Use for tables, columns, indexes, constraints, defaults, relationships, and referential actions.
 
-### FK inventory table
+### Referential-constraint inventory
 
 ```text
-child table.column(s) -> parent table.column(s) -> supporting index/unique coverage -> ON DELETE/ON UPDATE -> notes
+referencing object/column(s) -> referenced object/column(s) -> supporting access path/constraint coverage -> referential action -> notes
 ```
 
-A supporting index must cover the child-side FK columns in a useful leading-prefix order. A UNIQUE constraint can count only when it provides equivalent lookup/locking support for the child-side FK columns.
+Use this to check whether relationship enforcement, lookup paths, locking behavior, and implicit actions are supported by the resulting schema and local database behavior.
 
 ### Schema consistency table
 
 ```text
-semantic column family -> table.column -> type -> nullability -> default -> time/precision semantics -> notes
+semantic element family -> object/column -> type -> nullability -> default -> precision/representation semantics -> notes
 ```
 
-Use this for audit columns, history timestamps, codes, identifiers, tenant/account keys, status fields, and equivalent domain columns split across tables.
+Use this for schema elements that have the same semantic role across tables, modules, or contract boundaries.
 
 ## Checks
 
 Report when the PR:
-- creates semantically identical columns with inconsistent type, nullability, default, precision, collation, timezone semantics, or naming that changes behavior;
-- makes audit/history columns (`created_at`, `updated_at`, `deleted_at`, event/history timestamps) inconsistent across related tables;
-- adds, moves, or recreates FK child columns without supporting child-side index coverage, unless a local convention or schema evidence proves it is intentionally unnecessary;
-- relies on PostgreSQL FK behavior as if child-side indexes were created automatically;
-- drops or fails to preserve unique constraints/indexes that represented business invariants in the replaced/split schema;
-- adds NOT NULL, UNIQUE, FK, CHECK, or default constraints without safe backfill/cleanup sequencing for existing data;
-- introduces `ON DELETE` / `ON UPDATE` actions that conflict with project conventions, JPA ownership semantics, audit/history retention, or application-level business rules;
-- cascade-deletes history/audit data without explicit retention justification;
+- creates semantically equivalent schema elements with inconsistent type, nullability, default, precision, collation, representation semantics, or behavior-changing naming;
+- adds, moves, or recreates relationships without verifying the supporting physical access path, constraint coverage, or documented local convention;
+- assumes database-specific constraint/index behavior without checking the actual engine or project migration conventions;
+- drops or fails to preserve constraints or indexes that represented business invariants in the replaced or split schema;
+- adds NOT NULL, UNIQUE, relationship, CHECK, or default constraints without safe sequencing for existing data;
+- introduces referential actions that conflict with application ownership semantics, retention rules, or business rules;
+- makes implicit database actions affect retained or externally visible data without explicit justification;
 - creates a migration that is unsafe for old app -> new schema, new app -> transition schema, partial rollout, rollback, or repeated application;
-- performs potentially blocking DDL on large or hot tables without online/lock-duration reasoning when such table scale is part of the changed surface or local context;
-- changes identifier, status, enum-like, or code columns without checking readers, writers, generated contracts, and data repair needs.
+- performs potentially blocking DDL on large or hot tables without lock-duration reasoning when such table scale is part of the changed surface or local context;
+- changes schema elements used as identifiers, state markers, routing keys, or compatibility boundaries without checking readers, writers, contracts, and data repair needs.
 
 ## Evidence requirements
 
-For FK/index findings, name:
-- child table and column(s);
-- parent table and column(s);
-- existing supporting index/constraint status;
-- realistic query, parent DELETE/UPDATE, cascade, or locking path.
+For relationship/index findings, name:
+- referencing and referenced objects/columns;
+- existing supporting access path or constraint status;
+- realistic query, write, referential action, or locking path.
 
 For schema consistency findings, name:
-- semantic column family;
-- affected table/column pairs;
-- concrete incompatible type/default/nullability/time semantics;
-- likely read/write, audit, migration, or compatibility consequence.
+- semantic element family;
+- affected objects/columns;
+- concrete incompatible type/default/nullability/representation semantics;
+- likely read/write, migration, or compatibility consequence.
 
-For cascade findings, name:
-- FK constraint or table pair;
-- data that would be deleted/updated implicitly;
-- why the application, audit, history, cache, versioning, or domain model would not observe it safely.
+For implicit-action findings, name:
+- relationship or schema object involved;
+- data or state affected implicitly;
+- why the application, retention policy, cache, versioning, or domain model would not observe it safely.
 
 ## Tests and verification
 
 Prefer migration/integration verification through the real database engine when practical:
 - migration applies from an empty database;
 - migration applies from representative existing data;
-- metadata assertions for critical indexes, unique constraints, FKs, defaults, and column types;
+- metadata assertions for critical indexes, constraints, defaults, and column types;
 - old/new app compatibility smoke when rollout is relevant;
 - rollback or forward-fix evidence when rollback is not possible.
 
@@ -92,7 +90,7 @@ Prefer migration/integration verification through the real database engine when 
 
 Do not report:
 - generic SQL formatting or naming preferences;
-- index micro-optimizations without changed query, FK, locking, cascade, uniqueness, or rollout path;
+- index micro-optimizations without changed query, constraint, locking, referential action, uniqueness, or rollout path;
 - unrelated legacy schema issues not touched, depended on, exposed, or materially amplified by the PR;
 - broad migration redesign when a local schema or sequencing fix is enough;
 - speculative scale concerns when table size/query path is neither changed nor locally evidenced.
