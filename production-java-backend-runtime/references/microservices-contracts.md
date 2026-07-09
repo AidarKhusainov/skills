@@ -24,6 +24,18 @@ Do not remove, rename, narrow, or change semantics of public fields, endpoints, 
 
 Prefer additive changes.
 
+## Contract change map
+
+For contract-affecting changes, build this internal map:
+
+```text
+contract element -> old behavior -> new behavior -> compatibility strategy -> consumer impact -> tests
+```
+
+Use it to keep code, schema, generated artifacts, tests, and migration/deprecation notes aligned.
+
+Print the map only when it clarifies a compatibility decision or final verification note.
+
 ## Preferred approach
 
 For API changes:
