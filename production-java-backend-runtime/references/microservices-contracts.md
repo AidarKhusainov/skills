@@ -45,6 +45,8 @@ For API changes:
 - Version or deprecate when compatibility cannot be preserved.
 - Keep validation changes compatible unless the task requires stricter behavior.
 - Preserve documented error semantics.
+- For changed operations, classify outcomes:
+  `success -> validation/client error -> auth/authz failure -> conflict/not found when relevant -> dependency/server failure -> async/partial outcome when relevant`.
 
 For events/messages:
 
