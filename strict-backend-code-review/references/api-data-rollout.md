@@ -2,6 +2,9 @@
 
 Load this file only when the changed surface touches REST/gRPC APIs, DTOs, request/response schemas, event/message contracts, persistence, transactions, migrations, indexes, constraints, serialization, configuration compatibility, versioning, rollout, or rollback.
 
+For SQL/DDL-specific review, also load `db-migrations-playbook.md`.
+For OpenAPI/protobuf/generated-contract review, also load `openapi-contract-playbook.md`.
+
 ## Review focus
 
 Check whether the PR preserves:
@@ -29,6 +32,8 @@ Report when the PR:
 - changes API behavior through code but not contract/schema/docs when those are part of the project workflow.
 
 Required change should preserve compatibility, update the contract, or define a versioned/deprecated transition.
+
+Names that are part of generated/public contracts are not style-only. Review them for compatibility, reference stability, generated-client behavior, and tooling/searchability.
 
 ## Message and event contracts
 
@@ -61,8 +66,10 @@ For PATCH/partial updates, require explicit tests for missing, explicit null, va
 Report when the PR:
 - creates a schema that application code cannot safely read/write during rollout;
 - adds NOT NULL/unique/foreign key constraints without backfill/cleanup sequencing;
+- adds, moves, recreates, or drops foreign keys without verifying supporting child-column index coverage;
 - drops or renames columns/tables before all code paths stop using them;
-- changes indexes without considering query shape, uniqueness, locking, and rollout cost;
+- changes indexes without considering query shape, uniqueness, locking, parent-row DELETE/UPDATE checks, cascade cost, and rollout cost;
+- changes semantically identical columns in a way that makes type, nullability, default, precision, collation, or time-zone semantics inconsistent;
 - changes entity relationships in a way that can cause unintended cascade, orphan removal, or N+1 queries;
 - changes equality/hashCode/toString on JPA entities in a way that can break persistence behavior or leak data;
 - relies on application-only uniqueness without database constraint for critical invariants;
@@ -142,7 +149,7 @@ For API/data/rollout changes, check missing:
 
 Do not report:
 - hypothetical compatibility risk with no changed contract or consumer path;
-- database optimization preference without query/scale evidence;
+- database optimization preference without query/scale evidence, except when the index or constraint affects FK enforcement, parent-row DELETE/UPDATE checks, uniqueness, locking, cascade cost, documented query paths, or rollout safety;
 - broad migration redesign when a local sequencing fix is enough;
-- style-only DTO or entity naming issues;
+- style-only DTO or entity naming issues; generated/public contract names are not style-only when they affect compatibility or tooling;
 - unrelated legacy schema problems not touched or amplified by the PR.
