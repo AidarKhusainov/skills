@@ -65,13 +65,13 @@ Do not use this skill as the primary guide for frontend, mobile, data science, g
    Keep refactoring local unless broader redesign is explicitly requested.
 
 10. Report verification honestly.
-     Final response must say what changed, why it changed, surfaces touched, exact checks run, what was not verified, and any residual risks or follow-up refactoring opportunities.
+    Never claim checks passed unless they ran and passed. Surface skipped, failed, flaky, or unavailable checks.
 
 ## Surface classifier
 
 Before planning implementation, classify changed or implied surfaces.
 
-A triggered surface must affect the plan, reference loading, tests/verification, self-review, and final response.
+A triggered surface is actionable and must not be silently ignored.
 
 One file can trigger multiple surfaces.
 
@@ -120,7 +120,7 @@ Before editing, classify the task:
 
 For high-risk work:
 - build the relevant implementation artifacts;
-- load all references for triggered surfaces;
+- load every reference required by the triggered surfaces;
 - prefer test/reproduction before implementation;
 - run the most relevant narrow verification for each high-risk triggered surface when available;
 - do not treat compile/static checks as sufficient proof for behavior, contract, data, security, runtime, observability, or performance changes;
@@ -319,20 +319,11 @@ Never claim checks passed unless they actually ran and passed.
 
 Before final response, check:
 
-- Correctness.
-- Behavior preservation or intended behavior change.
-- Triggered surfaces and risk tier.
-- Backward compatibility.
-- Tests.
-- Runtime impact.
-- Observability.
-- Security.
-- Data/migration safety.
-- Kubernetes/container runtime impact.
-- Architecture boundaries.
-- Performance/load impact when relevant.
-- Refactoring scope and diff discipline.
-- Residual risks.
+- correctness and intended behavior;
+- triggered surfaces and risk tier;
+- compatibility, tests, security, data, runtime/resilience, observability, Kubernetes/container, architecture, and performance only when triggered;
+- refactoring scope and diff discipline;
+- residual risks.
 
 ## Reference loading guide
 
@@ -358,18 +349,12 @@ If a surface is triggered but its reference is not loaded, explain why it is not
 
 Done means:
 
-- Code follows reasonable repository conventions.
-- Code does not blindly preserve local bad practices in touched areas.
-- Change is minimal and localized unless architecture requires broader refactoring.
-- Public contracts remain backward-compatible or the migration path is explicit.
-- Error handling, timeouts, retries, idempotency, and transaction boundaries are considered when relevant.
-- Tests are added or updated at the right level.
-- Relevant build/test/static checks are run when available.
-- Runtime impact is reviewed: config, health, observability, resources, startup/shutdown, migrations.
-- Security impact is reviewed: auth, ownership, tenancy, confidential data, sensitive data, least privilege.
-- Performance/load impact is considered when the change touches hot paths, large data, database query shape, caching, serialization, concurrency, external calls, consumers, JVM/runtime resources, or Kubernetes resource limits.
-- Triggered focused passes were applied or explicitly marked not needed.
-- Final response reports what changed, why it changed, surfaces touched, checks run, and what remains unverified.
+- Change is minimal, localized, and aligned with reasonable repository conventions.
+- Touched code does not blindly preserve local bad practices when a low-risk improvement is possible.
+- Public behavior/contracts remain backward-compatible or the migration path is explicit.
+- Triggered focused passes were applied, with required references loaded or explicitly skipped.
+- Tests/checks were run at the right level when available; compile/static checks are not used as behavior proof.
+- Unverified risks, failed/skipped checks, flaky behavior, pre-existing issues, and follow-up refactoring opportunities are explicitly reported.
 
 ## Final response contract
 
