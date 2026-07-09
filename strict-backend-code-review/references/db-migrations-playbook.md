@@ -50,7 +50,7 @@ Use this for schema elements that have the same semantic role across tables, mod
 ## Checks
 
 Report when the PR:
-- introduces, exposes, or preserves semantically equivalent schema elements with inconsistent type, nullability, default, precision, collation, representation semantics, or behavior-changing naming;
+- introduces or exposes semantically equivalent schema elements with inconsistent type, nullability, default, precision, collation, or representation semantics;
 - uses inconsistent time, numeric, text/collation, enum/status, identifier, or state-marker representation for the same semantic role across related tables or contract boundaries;
 - adds, moves, or recreates relationships without verifying the supporting physical access path, constraint coverage, or documented local convention;
 - assumes database-specific constraint/index behavior without checking the actual engine or project migration conventions;
