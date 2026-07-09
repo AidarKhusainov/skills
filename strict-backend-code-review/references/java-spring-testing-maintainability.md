@@ -14,6 +14,18 @@ Check whether the PR preserves:
 - readable and simple touched code;
 - local Boy Scout cleanup.
 
+## Behavior map
+
+For changed production Java code, build this internal map before reporting findings:
+
+```text
+entry point -> validation -> auth -> domain decision -> transaction -> persistence -> side effect -> response/error
+```
+
+Use it to check changed branches, guards, exception paths, persistence effects, framework behavior, and response/error semantics.
+
+Print the map only in audit mode or when it is needed as evidence for a finding/question.
+
 ## Spring components and dependency injection
 
 Report when the PR:
