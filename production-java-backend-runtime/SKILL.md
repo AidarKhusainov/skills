@@ -1,6 +1,6 @@
 ---
 name: production-java-backend-runtime
-description: Use this skill when building, modifying, reviewing, debugging, or testing production Java backend services, especially Spring Boot services, REST/gRPC APIs, messaging/event-driven flows, persistence, transactions, migrations, microservice contracts, observability, security, resilience, performance/load-sensitive paths, Docker/container behavior, or Kubernetes runtime-facing changes. Use it for codebases that require maintainable, testable, production-safe backend changes with bounded improvement of touched code.
+description: Use this skill when building, modifying, reviewing, debugging, or testing production Java backend services, especially Spring Boot services, REST/gRPC APIs, messaging/event-driven flows, persistence, transactions, migrations, microservice contracts, observability, security, resilience, performance/load-sensitive paths, Docker/container behavior, or Kubernetes runtime-facing changes. Use it for codebases that require maintainable, testable, production-safe backend changes with bounded improvement of touched code, surface classification, risk-tiered planning, focused implementation passes, and honest verification.
 ---
 
 # Production Java Backend Runtime Skill
@@ -63,7 +63,112 @@ Do not use this skill as the primary guide for frontend, mobile, data science, g
    Keep refactoring local unless broader redesign is explicitly requested.
 
 10. Report verification honestly.
-    Final response must say what changed, what was verified, what was not verified, and any residual risks or follow-up refactoring opportunities.
+     Final response must say what changed, why it changed, surfaces touched, exact checks run, what was not verified, and any residual risks or follow-up refactoring opportunities.
+
+## Surface classifier
+
+Before planning implementation, classify changed or implied surfaces.
+
+A triggered surface must affect the plan, reference loading, tests/verification, self-review, and final response.
+
+One file can trigger multiple surfaces.
+
+- Java/Spring:
+  Java source, Spring controllers/services/configuration, validation, transactions, JPA, serialization, clients, or framework lifecycle behavior.
+
+- Tests:
+  behavior changes, bug fixes, refactoring, missing regression proof, flaky tests, or verification strategy.
+
+- API/contracts:
+  REST/gRPC/GraphQL, OpenAPI/protobuf, public DTOs, events, schemas, generated clients, error semantics, compatibility, or externally observed behavior.
+
+- Data/migrations:
+  repositories, queries, transactions, schema, migrations, indexes, constraints, backfills, outbox/inbox, or data consistency.
+
+- Security/privacy:
+  authn/authz, ownership, tenancy, roles/scopes, secrets, confidential data, sensitive data, admin operations, or denied behavior.
+
+- Runtime/resilience:
+  Docker, Kubernetes, Helm/Kustomize, env/config/secrets, probes, resources, startup/shutdown, external calls, retries, timeouts, consumers, schedulers, jobs, idempotency, or duplicate delivery.
+
+- Performance/load:
+  hot paths, large datasets, query shape, caching, serialization, allocation-heavy code, pools, backpressure, JVM memory/GC, resource limits, autoscaling signals, SLO/cost impact.
+
+## Risk tier
+
+Before editing, classify the task:
+
+- Trivial:
+  local rename, formatting-neutral cleanup, small test-only change, or no behavior/runtime/contract/data/security impact.
+
+- Normal:
+  localized behavior change with clear tests and limited affected surface.
+
+- High-risk:
+  public contract, persistence/migration, transaction boundary, auth/security, tenant ownership, async/consumer/job behavior, external calls, Kubernetes/runtime config, performance/load-sensitive path, or broad refactor.
+
+For high-risk work:
+- build the relevant implementation artifacts;
+- load all references for triggered surfaces;
+- prefer test/reproduction before implementation;
+- run at least one meaningful verification command when available;
+- explicitly report unverified risks.
+
+## Implementation artifacts
+
+Build compact artifacts internally when the corresponding surface is triggered. Do not print them by default.
+
+- Behavior map:
+  `entry point -> validation -> auth -> domain decision -> transaction -> persistence -> side effect -> response/error`
+
+- Change map:
+  `requirement -> touched file -> behavior changed -> test/verification`
+
+- Contract map:
+  `contract element -> old behavior -> new behavior -> compatibility strategy -> tests`
+
+- Data map:
+  `state/invariant -> transaction boundary -> query/schema/migration -> rollout/rollback impact -> tests`
+
+- Runtime map:
+  `trigger -> config/runtime artifact -> startup/readiness/shutdown/resource impact -> verification`
+
+- Security map:
+  `caller -> identity -> permission/scope -> ownership/tenancy -> allowed/denied behavior -> tests`
+
+- Performance map:
+  `hot path -> data size/cardinality -> query/allocation/concurrency/resource impact -> measurement or bounded reasoning`
+
+If an artifact cannot be built because required context is missing, ask a concise decision question before editing, implement the smallest safe reversible step, or explicitly report the residual risk.
+
+## Stop rules
+
+Do not guess when the decision changes:
+- externally visible product behavior;
+- API/event/schema compatibility;
+- data semantics or migration strategy;
+- security posture, ownership, tenancy, or permissions;
+- irreversible side effects;
+- runtime ownership or deployment sequencing;
+- performance/SLO tradeoff.
+
+When blocked by one of these, ask a concise decision question or implement the smallest safe reversible step.
+
+## Diff discipline
+
+Keep the diff reviewable.
+
+Before editing:
+- identify files expected to change;
+- avoid unrelated package moves, mass renames, formatting churn, dependency upgrades, generated-file churn, or architecture rewrites.
+
+During editing:
+- keep behavior, tests, config, migrations, and docs aligned;
+- avoid mixing refactor and behavior change unless refactor is needed to make the behavior safe.
+
+Before final response:
+- self-review the diff for unrelated edits;
+- remove accidental debug logs, temporary flags, dead code, unused dependencies, and broad formatting churn.
 
 ## Required workflow
 
@@ -93,6 +198,7 @@ Answer these before implementation when relevant:
 - What tests already cover this behavior?
 - What repository conventions are real and current?
 - What runtime/deployment artifacts may be affected?
+- What triggered surfaces and risk tier apply?
 - What is the smallest safe vertical slice?
 
 Ask the user only when the answer cannot be inferred from the repository or the decision changes product behavior, API contract, data semantics, security posture, performance expectations, or runtime ownership.
@@ -102,6 +208,7 @@ Ask the user only when the answer cannot be inferred from the repository or the 
 For non-trivial work, form a short plan before editing:
 
 - Desired behavior.
+- Triggered surfaces and risk tier.
 - Files/modules likely affected.
 - Feedback loop to prove correctness.
 - Tests to add/update.
@@ -135,23 +242,27 @@ When editing existing poor code:
 - Do not perform broad cleanup, mass renames, package moves, or architecture rewrites unless required by the task or explicitly requested.
 - Mention broader refactoring opportunities separately.
 
-### 5. Apply conditional deep checks
+### 5. Run focused implementation passes
 
-Always consider whether the change touches:
+Run the corresponding focused pass for every triggered surface before finalizing the patch.
 
-- Java quality.
-- Spring Boot framework behavior.
-- Tests and verification.
-- Microservice contracts.
-- Data, transactions, and migrations.
-- Resilience.
-- Observability and runtime health.
-- Security.
-- Architecture boundaries.
-- Kubernetes/container runtime.
-- Performance/load behavior.
+Each pass must affect at least one of:
+- implementation plan;
+- tests/verification;
+- reference loading;
+- self-review;
+- final response.
 
-Load only the relevant reference files.
+Focused passes:
+- Java/Spring pass -> framework semantics, transactions, validation, serialization, persistence behavior.
+- Tests pass -> behavior proof, regression coverage, useful test level, flaky-risk control.
+- API/contracts pass -> compatibility, request/response semantics, generated clients, errors, versioning.
+- Data/migrations pass -> schema/data safety, transactions, rollout, rollback, data consistency.
+- Security/privacy pass -> authz/authn, ownership, tenancy, secret/sensitive-data exposure.
+- Runtime/resilience pass -> config, probes, resources, shutdown, retries, timeouts, idempotency.
+- Performance/load pass -> query shape, hot path cost, allocation, concurrency, backpressure, SLO/cost risk.
+
+Do not let a passing Java unit test suppress a triggered data, contract, security, runtime, or performance pass.
 
 ### 6. Verify narrow-first, then broaden
 
@@ -186,6 +297,7 @@ Before final response, check:
 
 - Correctness.
 - Behavior preservation or intended behavior change.
+- Triggered surfaces and risk tier.
 - Backward compatibility.
 - Tests.
 - Runtime impact.
@@ -193,45 +305,27 @@ Before final response, check:
 - Security.
 - Data/migration safety.
 - Performance/load impact when relevant.
-- Refactoring scope.
+- Refactoring scope and diff discipline.
 - Residual risks.
 
 ## Reference loading guide
 
-Do not load every reference by default. Load only what the task touches.
+Do not load every reference by default.
 
-- `references/java-code-quality.md`
-  - Java source changes, refactoring, naming, complexity, immutability, error handling.
+Load the corresponding reference for every triggered surface:
 
-- `references/spring-boot.md`
-  - Spring configuration, beans, controllers, clients, Actuator, properties, profiles, startup, framework integration.
+- Java source quality -> `references/java-code-quality.md`.
+- Spring framework behavior -> `references/spring-boot.md`.
+- Tests and verification -> `references/testing.md`.
+- API/contracts -> `references/microservices-contracts.md`.
+- Data/migrations -> `references/data-transactions-migrations.md`.
+- Runtime/resilience -> `references/resilience.md` and/or `references/observability-runtime-health.md`.
+- Security/privacy -> `references/security.md`.
+- Architecture boundaries -> `references/clean-architecture-boundaries.md`.
+- Kubernetes/container runtime -> `references/kubernetes-container-runtime.md`.
+- Performance/load -> `references/performance-load.md`.
 
-- `references/testing.md`
-  - Behavior changes, bug fixes, refactoring, missing coverage, flaky tests, verification strategy.
-
-- `references/microservices-contracts.md`
-  - HTTP/gRPC APIs, events, schemas, clients, auth contracts, error semantics, backward compatibility.
-
-- `references/data-transactions-migrations.md`
-  - DB schema, queries, repositories, transactions, migrations, indexes, constraints, outbox/inbox, event consistency.
-
-- `references/resilience.md`
-  - External calls, messaging, retries, timeouts, circuit breakers, rate limits, bulkheads, graceful degradation.
-
-- `references/observability-runtime-health.md`
-  - Logs, metrics, traces, correlation IDs, Actuator health, probes, startup/shutdown, jobs, consumers, failure diagnostics.
-
-- `references/security.md`
-  - Authentication, authorization, tenancy, confidential data, sensitive data, input validation, admin APIs, or container/Kubernetes security posture.
-
-- `references/clean-architecture-boundaries.md`
-  - Module/package boundaries, dependency direction, domain logic placement, ports/adapters, refactoring, architectural cleanup.
-
-- `references/kubernetes-container-runtime.md`
-  - Dockerfile, Helm, Kustomize, Kubernetes YAML, probes, resources, security context, env/config/secrets, ports, init jobs, deployment behavior.
-
-- `references/performance-load.md`
-  - Hot paths, latency-sensitive APIs, high-throughput endpoints, large datasets, query shape, pagination, batching, caching, serialization, allocation-heavy code, concurrency, pools, consumers, backpressure, resource limits, JVM memory/GC, autoscaling signals, or SLO/cost impact.
+If a surface is triggered but its reference is not loaded, explain why it is not needed.
 
 ## Quality gates
 
@@ -247,7 +341,8 @@ Done means:
 - Runtime impact is reviewed: config, health, observability, resources, startup/shutdown, migrations.
 - Security impact is reviewed: auth, ownership, tenancy, confidential data, sensitive data, least privilege.
 - Performance/load impact is considered when the change touches hot paths, large data, database query shape, caching, serialization, concurrency, external calls, consumers, JVM/runtime resources, or Kubernetes resource limits.
-- Final response reports what changed, what was verified, and what remains unverified.
+- Triggered focused passes were applied or explicitly marked not needed.
+- Final response reports what changed, why it changed, surfaces touched, checks run, and what remains unverified.
 
 ## Final response contract
 
@@ -257,7 +352,8 @@ Final response must include:
 
 - What changed.
 - Why it changed.
-- What was verified.
+- Surfaces touched.
+- Tests/checks run with exact commands.
 - What was not verified.
 - Residual risks or follow-up refactoring opportunities, if any.
 
