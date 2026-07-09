@@ -55,7 +55,7 @@ Use only when explicitly requested. Output normal review first, then compact foc
 4. Classify changed files, diff hunks, and implied surfaces using the surface classifier.
 5. Run every triggered focused pass. Do not review a multi-domain PR as one flat diff.
 6. Check negative space inside each triggered pass.
-7. Load only relevant references and playbooks.
+7. Load references and playbooks required by triggered passes. Do not load unrelated references by default.
 8. Inspect repository context only to prove or disprove concrete risks.
 9. Audit changed behavior: map each merge-relevant changed branch, guard, validator, invariant, false/failure path, observable behavior, and race/idempotency path to proof: test, finding, question, N/A, or partial note.
 10. Apply evidence gate.
@@ -76,6 +76,8 @@ Mark review partial if missing context or foundational blockers make important v
 Before detailed review, classify changed files, hunks, and implied surfaces.
 
 A triggered pass is mandatory. Do not silently skip it, and do not let one strong finding suppress another domain pass.
+
+One changed file can trigger multiple passes. Review each triggered domain separately, then merge only same-root-cause findings.
 
 - Java/Spring pass:
   `src/main/java/**`, Spring controllers/services/configuration, validation, Jackson, transactions, JPA entities/repositories, or changed Java framework semantics.
@@ -133,6 +135,8 @@ Required artifacts:
 
 Do not print artifacts by default. Use them as internal evidence. Print compact artifacts only in audit mode or when needed to support a finding/question.
 
+If an artifact cannot be built because necessary context is unavailable, mark the affected pass partial or turn the missing evidence into a merge-relevant Question.
+
 ## Context budget
 
 Do not inspect the entire repository by default.
@@ -151,16 +155,16 @@ Stop expanding context when the risk is verified, disproven, not applicable, or 
 
 Do not load every reference by default.
 
-Load only when relevant:
-- `references/architecture-domain.md` — architecture, DDD, boundaries, aggregates, invariants, use cases.
-- `references/api-data-rollout.md` — APIs, DTOs, events, serialization, persistence, transactions, migrations, rollout/rollback.
-- `references/db-migrations-playbook.md` — DB schema consistency, constraint/index support, referential actions, migration safety.
-- `references/openapi-contract-playbook.md` — OpenAPI operation matrix, response/status alignment, generated-client and public contract proof.
-- `references/security-privacy-observability.md` — authn/authz, tenant isolation, secrets, PII, audit, logs, metrics, traces.
-- `references/runtime-resilience-concurrency.md` — Kubernetes, probes, shutdown, external calls, retries, idempotency, locking, races.
-- `references/java-spring-testing-maintainability.md` — Java, Spring, JPA, validation, transactions, Jackson, tests, readability, simplicity.
-- `references/review-contract.md` — finding fields, severity, confidence, verdict, output format, audit mode, self-check.
-- `references/examples.md` — output examples only.
+Load the corresponding reference for every triggered pass:
+- Architecture/DDD pass or architectural risk -> `references/architecture-domain.md`.
+- Java/Spring or Tests pass -> `references/java-spring-testing-maintainability.md`.
+- DB/migrations pass -> `references/db-migrations-playbook.md` and `references/api-data-rollout.md`.
+- OpenAPI/contracts pass -> `references/openapi-contract-playbook.md` and `references/api-data-rollout.md`.
+- Security/privacy or observability pass -> `references/security-privacy-observability.md`.
+- Runtime/concurrency pass -> `references/runtime-resilience-concurrency.md`.
+- API/data/serialization/events/transactions/rollout compatibility risk -> `references/api-data-rollout.md`.
+- Review output, severity, confidence, verdict, audit mode, or self-check ambiguity -> `references/review-contract.md`.
+- Output examples only -> `references/examples.md`.
 
 Load `references/review-contract.md` before producing any non-clean review, audit output, or when checking whether a finding should affect verdict.
 
