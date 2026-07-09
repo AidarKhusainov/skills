@@ -1,6 +1,6 @@
 ---
 name: production-java-backend-runtime
-description: Use this skill when building, modifying, reviewing, debugging, or testing production Java backend services, especially Spring Boot services, REST/gRPC APIs, messaging/event-driven flows, persistence, transactions, migrations, microservice contracts, observability, security, resilience, performance/load-sensitive paths, Docker/container behavior, or Kubernetes runtime-facing changes. Use it for codebases that require maintainable, testable, production-safe backend changes with bounded improvement of touched code.
+description: Use this skill for implementation, debugging, testing, refactoring, and self-review of production Java backend services, especially Spring Boot services, REST/gRPC APIs, messaging/event-driven flows, persistence, transactions, migrations, microservice contracts, observability, security, resilience, performance/load-sensitive paths, Docker/container behavior, or Kubernetes runtime-facing changes. For merge-gate PR/code-diff review, use `strict-backend-code-review` instead.
 ---
 
 # Production Java Backend Runtime Skill
@@ -8,6 +8,8 @@ description: Use this skill when building, modifying, reviewing, debugging, or t
 Use this skill for production-grade Java backend work where correctness, maintainability, testability, runtime safety, and bounded improvement matter.
 
 This skill is application-first and platform-aware, but not platform-owner. It applies to Java backend services and their runtime-facing artifacts when those artifacts live in the repository.
+
+This skill may self-review implementation work, but it is not the primary merge-gate PR/code-diff review skill. For review-only PR/code-diff verdicts, use `strict-backend-code-review`.
 
 ## When to use this skill
 
@@ -23,7 +25,7 @@ Use this skill for tasks involving:
 - Security: authn/authz, tenancy, object ownership, confidential data, sensitive data, runtime privileges.
 - Runtime-facing artifacts: Dockerfile, Helm, Kustomize, Kubernetes YAML, probes, resources, env/config/secrets.
 - Performance/load-sensitive changes: hot paths, high-throughput endpoints, large datasets, query shape, caching, serialization, concurrency, resource limits, JVM memory/GC, or SLO/cost impact.
-- Code review, debugging, refactoring, or tests in a Java backend repository.
+- Implementation self-review, debugging, refactoring, or tests in a Java backend repository.
 
 Do not use this skill as the primary guide for frontend, mobile, data science, generic DevOps/IaC ownership, or non-Java code unless the task directly affects a Java backend service.
 
@@ -63,7 +65,132 @@ Do not use this skill as the primary guide for frontend, mobile, data science, g
    Keep refactoring local unless broader redesign is explicitly requested.
 
 10. Report verification honestly.
-    Final response must say what changed, what was verified, what was not verified, and any residual risks or follow-up refactoring opportunities.
+    Never claim checks passed unless they ran and passed. Surface skipped, failed, flaky, or unavailable checks.
+
+## Surface classifier
+
+Before planning implementation, classify changed or implied surfaces.
+
+A triggered surface is actionable and must not be silently ignored.
+
+One file can trigger multiple surfaces.
+
+- Java/Spring:
+  Java source, Spring controllers/services/configuration, validation, transactions, JPA, serialization, clients, or framework lifecycle behavior.
+
+- Tests:
+  behavior changes, bug fixes, refactoring, missing regression proof, flaky tests, or verification strategy.
+
+- API/contracts:
+  REST/gRPC/GraphQL, OpenAPI/protobuf, public DTOs, events, schemas, generated clients, error semantics, compatibility, or externally observed behavior.
+
+- Data/migrations:
+  repositories, queries, transactions, schema, migrations, indexes, constraints, backfills, outbox/inbox, or data consistency.
+
+- Security/privacy:
+  authn/authz, ownership, tenancy, roles/scopes, secrets, confidential data, sensitive data, admin operations, or denied behavior.
+
+- Runtime/resilience:
+  external calls, retries, timeouts, circuit breakers, rate limits, bulkheads, graceful degradation, consumers, schedulers, jobs, idempotency, duplicate delivery, or failure recovery.
+
+- Observability/runtime-health:
+  logs, metrics, traces, correlation/request IDs, audit logs, health endpoints, diagnostics, alert/dashboard-facing metrics, or failure visibility.
+
+- Kubernetes/container runtime:
+  Dockerfile, Helm, Kustomize, Kubernetes YAML, probes, resources, security context, env/config/secrets, ports, init jobs, or deployment behavior.
+
+- Architecture boundaries:
+  module/package boundaries, dependency direction, domain/application/infrastructure placement, ports/adapters, use-case boundaries, broad refactor, or architectural cleanup.
+
+- Performance/load:
+  hot paths, large datasets, query shape, caching, serialization, allocation-heavy code, pools, backpressure, JVM memory/GC, resource limits, autoscaling signals, SLO/cost impact.
+
+## Risk tier
+
+Before editing, classify the task:
+
+- Trivial:
+  local rename, formatting-neutral cleanup, small test-only change, or no behavior/runtime/contract/data/security impact.
+
+- Normal:
+  localized behavior change with clear tests and limited affected surface.
+
+- High-risk:
+  public contract, persistence/migration, transaction boundary, auth/security, tenant ownership, async/consumer/job behavior, external calls, observability/runtime-health behavior, Kubernetes/runtime config, performance/load-sensitive path, architecture boundary change, or broad refactor.
+
+For high-risk work:
+- build the relevant implementation artifacts;
+- load every reference required by the triggered surfaces;
+- prefer test/reproduction before implementation;
+- run the most relevant narrow verification for each high-risk triggered surface when available;
+- do not treat compile/static checks as sufficient proof for behavior, contract, data, security, runtime, observability, or performance changes;
+- if a meaningful check cannot be run, report the unverified risk explicitly.
+
+## Implementation artifacts
+
+Build compact artifacts internally when the corresponding surface is triggered. Do not print them by default.
+
+- Behavior map:
+  `entry point -> validation -> auth -> domain decision -> transaction -> persistence -> side effect -> response/error`
+
+- Change map:
+  `requirement -> touched file -> behavior changed -> test/verification`
+
+- Contract map:
+  `contract element -> old behavior -> new behavior -> compatibility strategy -> tests`
+
+- Data map:
+  `state/invariant -> transaction boundary -> query/schema/migration -> rollout/rollback impact -> tests`
+
+- Runtime map:
+  `trigger -> runtime path -> timeout/retry/idempotency/failure recovery -> verification`
+
+- Observability map:
+  `event/failure path -> log/metric/trace -> correlation -> cardinality/sensitive-data risk -> verification`
+
+- Kubernetes/container map:
+  `runtime artifact -> startup/readiness/shutdown -> resources/security/env/ports -> rollout impact -> verification`
+
+- Architecture map:
+  `boundary/change -> dependency direction -> domain/application/infrastructure placement -> scope/protection`
+
+- Security map:
+  `caller -> identity -> permission/scope -> ownership/tenancy -> allowed/denied behavior -> tests`
+
+- Performance map:
+  `hot path -> data size/cardinality -> query/allocation/concurrency/resource impact -> measurement or bounded reasoning`
+
+If an artifact cannot be built because required context is missing, ask a concise decision question before editing, implement the smallest safe reversible step, or explicitly report the residual risk.
+
+## Stop rules
+
+Do not guess when the decision changes:
+- externally visible product behavior;
+- API/event/schema compatibility;
+- data semantics or migration strategy;
+- security posture, ownership, tenancy, or permissions;
+- irreversible side effects;
+- runtime ownership or deployment sequencing;
+- architecture boundaries, dependency direction, or module ownership;
+- performance/SLO tradeoff.
+
+When blocked by one of these, ask a concise decision question or implement the smallest safe reversible step.
+
+## Diff discipline
+
+Keep the diff reviewable.
+
+Before editing:
+- identify files expected to change;
+- avoid unrelated package moves, mass renames, formatting churn, dependency upgrades, generated-file churn, or architecture rewrites.
+
+During editing:
+- keep behavior, tests, config, migrations, and docs aligned;
+- avoid mixing refactor and behavior change unless refactor is needed to make the behavior safe.
+
+Before final response:
+- self-review the diff for unrelated edits;
+- remove accidental debug logs, temporary flags, dead code, unused dependencies, and broad formatting churn.
 
 ## Required workflow
 
@@ -93,6 +220,7 @@ Answer these before implementation when relevant:
 - What tests already cover this behavior?
 - What repository conventions are real and current?
 - What runtime/deployment artifacts may be affected?
+- What triggered surfaces and risk tier apply?
 - What is the smallest safe vertical slice?
 
 Ask the user only when the answer cannot be inferred from the repository or the decision changes product behavior, API contract, data semantics, security posture, performance expectations, or runtime ownership.
@@ -102,6 +230,7 @@ Ask the user only when the answer cannot be inferred from the repository or the 
 For non-trivial work, form a short plan before editing:
 
 - Desired behavior.
+- Triggered surfaces and risk tier.
 - Files/modules likely affected.
 - Feedback loop to prove correctness.
 - Tests to add/update.
@@ -135,23 +264,30 @@ When editing existing poor code:
 - Do not perform broad cleanup, mass renames, package moves, or architecture rewrites unless required by the task or explicitly requested.
 - Mention broader refactoring opportunities separately.
 
-### 5. Apply conditional deep checks
+### 5. Run focused implementation passes
 
-Always consider whether the change touches:
+Run the corresponding focused pass for every triggered surface before finalizing the patch.
 
-- Java quality.
-- Spring Boot framework behavior.
-- Tests and verification.
-- Microservice contracts.
-- Data, transactions, and migrations.
-- Resilience.
-- Observability and runtime health.
-- Security.
-- Architecture boundaries.
-- Kubernetes/container runtime.
-- Performance/load behavior.
+Each pass must affect at least one of:
+- implementation plan;
+- tests/verification;
+- reference loading;
+- self-review;
+- final response.
 
-Load only the relevant reference files.
+Focused passes:
+- Java/Spring pass -> framework semantics, transactions, validation, serialization, persistence behavior.
+- Tests pass -> behavior proof, regression coverage, useful test level, flaky-risk control.
+- API/contracts pass -> compatibility, request/response semantics, generated clients, errors, versioning.
+- Data/migrations pass -> schema/data safety, transactions, rollout, rollback, data consistency.
+- Security/privacy pass -> authz/authn, ownership, tenancy, secret/sensitive-data exposure.
+- Runtime/resilience pass -> external calls, retries, timeouts, circuit breakers, rate limits, graceful degradation, idempotency, failure recovery.
+- Observability/runtime-health pass -> logs, metrics, traces, health diagnostics, correlation continuity, cardinality, sensitive-data leakage.
+- Kubernetes/container runtime pass -> container startup, manifests, probes, resources, env/config/secrets, ports, security context, deployment behavior.
+- Architecture boundaries pass -> dependency direction, domain/application/infrastructure separation, use-case boundaries, refactoring scope.
+- Performance/load pass -> query shape, hot path cost, allocation, concurrency, backpressure, SLO/cost risk.
+
+Do not let a passing Java unit test suppress a triggered data, contract, security, runtime, observability, Kubernetes/container, architecture, or performance pass.
 
 ### 6. Verify narrow-first, then broaden
 
@@ -184,70 +320,42 @@ Never claim checks passed unless they actually ran and passed.
 
 Before final response, check:
 
-- Correctness.
-- Behavior preservation or intended behavior change.
-- Backward compatibility.
-- Tests.
-- Runtime impact.
-- Observability.
-- Security.
-- Data/migration safety.
-- Performance/load impact when relevant.
-- Refactoring scope.
-- Residual risks.
+- correctness and intended behavior;
+- triggered surfaces and risk tier;
+- compatibility, tests, security, data, runtime/resilience, observability, Kubernetes/container, architecture, and performance only when triggered;
+- refactoring scope and diff discipline;
+- residual risks.
 
 ## Reference loading guide
 
-Do not load every reference by default. Load only what the task touches.
+Do not load every reference by default.
 
-- `references/java-code-quality.md`
-  - Java source changes, refactoring, naming, complexity, immutability, error handling.
+Load the corresponding reference for every non-trivial triggered surface:
 
-- `references/spring-boot.md`
-  - Spring configuration, beans, controllers, clients, Actuator, properties, profiles, startup, framework integration.
+- Java source quality -> `references/java-code-quality.md`.
+- Spring framework behavior -> `references/spring-boot.md`.
+- Tests and verification -> `references/testing.md`.
+- API/contracts -> `references/microservices-contracts.md`.
+- Data/migrations -> `references/data-transactions-migrations.md`.
+- Runtime/resilience -> `references/resilience.md`.
+- Observability/runtime-health -> `references/observability-runtime-health.md`.
+- Security/privacy -> `references/security.md`.
+- Architecture boundaries -> `references/clean-architecture-boundaries.md`.
+- Kubernetes/container runtime -> `references/kubernetes-container-runtime.md`.
+- Performance/load -> `references/performance-load.md`.
 
-- `references/testing.md`
-  - Behavior changes, bug fixes, refactoring, missing coverage, flaky tests, verification strategy.
-
-- `references/microservices-contracts.md`
-  - HTTP/gRPC APIs, events, schemas, clients, auth contracts, error semantics, backward compatibility.
-
-- `references/data-transactions-migrations.md`
-  - DB schema, queries, repositories, transactions, migrations, indexes, constraints, outbox/inbox, event consistency.
-
-- `references/resilience.md`
-  - External calls, messaging, retries, timeouts, circuit breakers, rate limits, bulkheads, graceful degradation.
-
-- `references/observability-runtime-health.md`
-  - Logs, metrics, traces, correlation IDs, Actuator health, probes, startup/shutdown, jobs, consumers, failure diagnostics.
-
-- `references/security.md`
-  - Authentication, authorization, tenancy, confidential data, sensitive data, input validation, admin APIs, or container/Kubernetes security posture.
-
-- `references/clean-architecture-boundaries.md`
-  - Module/package boundaries, dependency direction, domain logic placement, ports/adapters, refactoring, architectural cleanup.
-
-- `references/kubernetes-container-runtime.md`
-  - Dockerfile, Helm, Kustomize, Kubernetes YAML, probes, resources, security context, env/config/secrets, ports, init jobs, deployment behavior.
-
-- `references/performance-load.md`
-  - Hot paths, latency-sensitive APIs, high-throughput endpoints, large datasets, query shape, pagination, batching, caching, serialization, allocation-heavy code, concurrency, pools, consumers, backpressure, resource limits, JVM memory/GC, autoscaling signals, or SLO/cost impact.
+For trivial changes, a triggered reference may be skipped only when it would not affect the plan, implementation, verification, or final response. If skipped, briefly note why.
 
 ## Quality gates
 
 Done means:
 
-- Code follows reasonable repository conventions.
-- Code does not blindly preserve local bad practices in touched areas.
-- Change is minimal and localized unless architecture requires broader refactoring.
-- Public contracts remain backward-compatible or the migration path is explicit.
-- Error handling, timeouts, retries, idempotency, and transaction boundaries are considered when relevant.
-- Tests are added or updated at the right level.
-- Relevant build/test/static checks are run when available.
-- Runtime impact is reviewed: config, health, observability, resources, startup/shutdown, migrations.
-- Security impact is reviewed: auth, ownership, tenancy, confidential data, sensitive data, least privilege.
-- Performance/load impact is considered when the change touches hot paths, large data, database query shape, caching, serialization, concurrency, external calls, consumers, JVM/runtime resources, or Kubernetes resource limits.
-- Final response reports what changed, what was verified, and what remains unverified.
+- Change is minimal, localized, and aligned with reasonable repository conventions.
+- Touched code does not blindly preserve local bad practices when a low-risk improvement is possible.
+- Public behavior/contracts remain backward-compatible or the migration path is explicit.
+- Triggered focused passes were applied, with required references loaded or explicitly skipped.
+- Tests/checks were run at the right level when available; compile/static checks are not used as behavior proof.
+- Unverified risks, failed/skipped checks, flaky behavior, pre-existing issues, and follow-up refactoring opportunities are explicitly reported.
 
 ## Final response contract
 
@@ -257,7 +365,8 @@ Final response must include:
 
 - What changed.
 - Why it changed.
-- What was verified.
+- Surfaces touched.
+- Tests/checks run with exact commands.
 - What was not verified.
 - Residual risks or follow-up refactoring opportunities, if any.
 

@@ -24,6 +24,18 @@ Do not remove, rename, narrow, or change semantics of public fields, endpoints, 
 
 Prefer additive changes.
 
+## Contract change map
+
+For contract-affecting changes, build this internal map:
+
+```text
+contract element -> old behavior -> new behavior -> compatibility strategy -> consumer impact -> tests
+```
+
+Use it to keep code, schema, generated artifacts, tests, and migration/deprecation notes aligned.
+
+Print the map only when it clarifies a compatibility decision or final verification note.
+
 ## Preferred approach
 
 For API changes:
@@ -33,6 +45,8 @@ For API changes:
 - Version or deprecate when compatibility cannot be preserved.
 - Keep validation changes compatible unless the task requires stricter behavior.
 - Preserve documented error semantics.
+- For changed operations, classify outcomes:
+  `success -> validation/client error -> auth/authz failure -> conflict/not found when relevant -> dependency/server failure -> async/partial outcome when relevant`.
 
 For events/messages:
 

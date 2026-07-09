@@ -23,6 +23,18 @@ Use environment-aware migration discipline:
 - Local/unmerged migrations may be edited or squashed only when there is clear evidence they have not been applied outside the current branch.
 - When uncertain, assume the migration is immutable.
 
+## Data change map
+
+For data-affecting changes, build this internal map:
+
+```text
+state/invariant -> transaction boundary -> query/schema/migration -> rollout/rollback impact -> verification
+```
+
+Use it to keep code, migration, transaction boundaries, data semantics, and tests aligned.
+
+Print the map only when it clarifies a migration/data-safety decision or final residual-risk note.
+
 ## Preferred approach
 
 For schema evolution:
@@ -33,6 +45,16 @@ For schema evolution:
 - Add indexes and constraints deliberately.
 - Consider lock time, table size, write load, and rollout order.
 - Include verification queries for risky changes.
+
+For relationship changes:
+
+- Verify database-engine-specific relationship/index behavior.
+- Do not assume supporting child-side access paths exist implicitly.
+- Verify cascade and referential actions against application ownership and retention semantics.
+
+For schema consistency:
+
+- Keep semantically equivalent columns and state markers consistent in type, nullability, default, precision, representation semantics, and constraints across related tables.
 
 For transactions:
 
