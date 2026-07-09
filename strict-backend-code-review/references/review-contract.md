@@ -118,7 +118,7 @@ Valid evidence includes:
 - repo-local convention from docs or recent local code;
 - applicable framework/runtime behavior;
 - realistic old/new version, retry, concurrency, rollout, or failure scenario;
-- focused-pass artifacts such as behavior map, proof map, schema-risk inventory, FK inventory, schema consistency table, operation matrix, schema naming/generator-impact scan, access-control trace, or state-transition view.
+- focused-pass artifacts such as behavior map, proof map, schema-risk inventory, referential-constraint inventory, schema consistency table, operation matrix, contract-identifier/generator-impact scan, access-control trace, or state-transition view.
 
 Invalid evidence includes:
 - vague impressions;
