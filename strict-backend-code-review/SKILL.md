@@ -1,7 +1,7 @@
 ---
 name: strict-backend-code-review
-description: Use for review-only Java/Spring backend PR or code-diff review. Apply merge-gate review for correctness, architecture/DDD, API/data compatibility, security/privacy, Kubernetes/runtime readiness, resilience, tests, and maintainability using changed surface, negative space, evidence gate, false-positive challenge, and deterministic verdict. Does not implement fixes or duplicate CI/linter/formatter output.
-version: 0.1.0
+description: Use for review-only Java/Spring backend PR or code-diff review. Apply merge-gate review for correctness, architecture/DDD, API/data compatibility, security/privacy, Kubernetes/runtime readiness, resilience, tests, and maintainability using changed surface, focused passes, negative space, evidence gate, false-positive challenge, and deterministic verdict. Does not implement fixes or duplicate CI/linter/formatter output.
+version: 0.2.0
 ---
 
 # Strict Backend Code Review
@@ -20,6 +20,12 @@ Everything touched or implied by PR intent: production code, tests, APIs, DTOs, 
 Negative space:
 Required code, tests, contracts, configs, manifests, migrations, docs, or operational artifacts that should have changed but did not.
 
+Focused passes:
+Triggered domain-specific review passes that inspect their surface as first-class code, not as supporting context for Java.
+
+Evidence artifacts:
+Compact internal maps/tables created during focused passes to prove or disprove concrete risks. Do not print them by default.
+
 Evidence gate:
 No finding survives without concrete, checkable evidence tied to changed surface.
 
@@ -34,32 +40,98 @@ Verdict is derived mechanically from surviving findings.
 Default: Standard review.
 
 Parallel deep review:
-Use only when explicitly requested or when the PR is large, high-risk, multi-domain, and the host supports subagents. Split subagents by risk area. Parent reviewer must deduplicate and produce one final review.
+Use only when explicitly requested or when the PR is large, high-risk, multi-domain, and the host supports subagents or deep research. Split subagents by triggered focused pass. Parent reviewer must collect candidates, deduplicate by root cause, re-apply the evidence gate and false-positive challenge, derive severity/verdict, and produce one final review.
+
+If subagents are unavailable, run the same focused passes sequentially in the main reviewer.
 
 Audit mode:
-Use only when explicitly requested. Output normal review first, then compact coverage matrix. Do not print coverage by default.
+Use only when explicitly requested. Output normal review first, then compact focused-pass coverage matrix. Do not print coverage by default.
 
 ## Workflow
 
 1. Read PR title, description, linked ticket, ADR/design note, acceptance criteria, rollout notes, and repo-local instructions when available.
 2. Extract intent, scope, constraints, expected behavior, and risk surface.
 3. Build changed surface.
-4. Check negative space.
-5. Load only relevant references.
-6. Inspect repository context only to prove or disprove concrete risks.
-7. Audit changed behavior: map each merge-relevant changed branch, guard, validator, invariant, false/failure path, observable behavior, and race/idempotency path to proof: test, finding, question, N/A, or partial note.
-8. Apply evidence gate.
-9. Group findings by root cause.
-10. Apply false-positive challenge to CRITICAL/HIGH/MEDIUM.
-11. Derive verdict.
-12. Output the review.
+4. Classify changed files, diff hunks, and implied surfaces using the surface classifier.
+5. Run every triggered focused pass. Do not review a multi-domain PR as one flat diff.
+6. Check negative space inside each triggered pass.
+7. Load only relevant references and playbooks.
+8. Inspect repository context only to prove or disprove concrete risks.
+9. Audit changed behavior: map each merge-relevant changed branch, guard, validator, invariant, false/failure path, observable behavior, and race/idempotency path to proof: test, finding, question, N/A, or partial note.
+10. Apply evidence gate.
+11. Group findings by root cause.
+12. Apply false-positive challenge to CRITICAL/HIGH/MEDIUM.
+13. Derive verdict.
+14. Output the review.
 
 Completion criterion:
-Changed surface is checked, not applicable, finding, question, or not fully reviewable.
+Every triggered focused pass is checked, not applicable, finding, question, or not fully reviewable.
 
 Do not print coverage unless audit mode is requested.
 
 Mark review partial if missing context or foundational blockers make important verification unreliable.
+
+## Surface classifier
+
+Before detailed review, classify changed files, hunks, and implied surfaces.
+
+A triggered pass is mandatory. Do not silently skip it, and do not let one strong finding suppress another domain pass.
+
+- Java/Spring pass:
+  `src/main/java/**`, Spring controllers/services/configuration, validation, Jackson, transactions, JPA entities/repositories, or changed Java framework semantics.
+- Tests pass:
+  `src/test/**`, test fixtures, contract tests, integration tests, mocks/stubs, or changed risky behavior without matching proof.
+- DB/migrations pass:
+  `*.sql`, `db/**`, `migration/**`, `migrations/**`, Liquibase/Flyway, `CREATE TABLE`, `ALTER TABLE`, `ADD CONSTRAINT`, `CREATE INDEX`, `DROP INDEX`, or changed persistence schema.
+- OpenAPI/contracts pass:
+  `openapi*.yaml`, `openapi/**/*.yaml`, `*.proto`, generated API interfaces, public DTOs, `operationId`, `responses`, `$ref`, `required`, `components.schemas`, or externally consumed contract changes.
+- Security/privacy pass:
+  authentication, authorization, tenant/user/object ownership, scopes/roles/permissions, secrets, tokens, PII, audit-sensitive operations, or security-sensitive domain actions.
+- Runtime/concurrency pass:
+  Kubernetes/Helm/manifests, config/env, probes, resources, external calls, retries, timeouts, circuit breakers, async jobs, consumers, schedulers, locks, idempotency, duplicate delivery, or race-prone state transitions.
+
+## Focused passes
+
+When more than one domain is triggered, do not review the PR as one flat diff.
+
+Run each triggered focused pass independently, then deduplicate findings by root cause.
+
+Each pass must either:
+- produce findings;
+- produce merge-relevant questions;
+- be explicitly checked with no finding in audit mode;
+- or mark the review partial if required evidence is unavailable.
+
+A pass may produce no findings. It must still inspect its own changed surface as first-class code.
+
+## Specialist stance
+
+During each focused pass, review as the specialist accountable for that domain:
+
+- Java/Spring pass: senior Spring backend reviewer responsible for framework semantics, boundaries, transaction behavior, validation, persistence mapping, serialization, and maintainability.
+- Tests pass: test-design reviewer responsible for proving changed behavior, regressions, failure modes, and observable outcomes.
+- DB/migrations pass: PostgreSQL schema and migration safety reviewer responsible for data integrity, constraints, indexes, locks, rollout, rollback, and audit/history retention.
+- OpenAPI/contracts pass: external contract and generated-client reviewer responsible for status semantics, compatibility, schema stability, validation, and error shapes.
+- Security/privacy pass: application security reviewer responsible for authz/authn, ownership, tenant isolation, secret/PII exposure, and concrete attack paths.
+- Runtime/concurrency pass: SRE and distributed-systems reviewer responsible for rollout safety, probes, shutdown, retries, timeouts, backpressure, duplicate delivery, idempotency, locking, races, and diagnosability.
+
+## Evidence artifacts
+
+Build compact evidence artifacts internally when the corresponding pass is triggered.
+
+Required artifacts:
+- Java/Spring -> behavior map:
+  `entry point -> validation -> auth -> domain decision -> transaction -> persistence -> side effect -> response/error`
+- Tests -> proof map:
+  `changed behavior -> existing proof -> missing proof`
+- DB/migrations -> schema-risk inventory, FK inventory table, schema consistency table.
+- OpenAPI/contracts -> operation matrix, schema naming and generator-impact scan.
+- Security/privacy -> access-control trace:
+  `caller -> identity -> permission/scope -> tenant/object ownership -> allowed action -> denied behavior -> tests`
+- Runtime/concurrency -> state-transition view:
+  `trigger -> read state -> lock/constraint -> write state -> side effect -> ack/commit -> retry result`
+
+Do not print artifacts by default. Use them as internal evidence. Print compact artifacts only in audit mode or when needed to support a finding/question.
 
 ## Context budget
 
@@ -82,6 +154,8 @@ Do not load every reference by default.
 Load only when relevant:
 - `references/architecture-domain.md` — architecture, DDD, boundaries, aggregates, invariants, use cases.
 - `references/api-data-rollout.md` — APIs, DTOs, events, serialization, persistence, transactions, migrations, rollout/rollback.
+- `references/db-migrations-playbook.md` — DB schema consistency, FK/index support, constraints, cascade semantics, migration safety.
+- `references/openapi-contract-playbook.md` — OpenAPI operation matrix, response completeness, generated-client/schema naming, contract proof.
 - `references/security-privacy-observability.md` — authn/authz, tenant isolation, secrets, PII, audit, logs, metrics, traces.
 - `references/runtime-resilience-concurrency.md` — Kubernetes, probes, shutdown, external calls, retries, idempotency, locking, races.
 - `references/java-spring-testing-maintainability.md` — Java, Spring, JPA, validation, transactions, Jackson, tests, readability, simplicity.
@@ -235,6 +309,9 @@ Do not output praise, positive notes, generic advice, process commentary, or rit
 
 Before returning:
 - verdict and highest severity match findings;
+- every triggered focused pass was completed, marked not applicable, represented by a finding/question, or marked partial;
+- no focused pass was skipped because another domain produced a stronger finding;
+- required evidence artifacts were built internally when DB/migrations, OpenAPI/contracts, security/privacy, or runtime/concurrency passes were triggered;
 - CRITICAL/HIGH/MEDIUM findings have evidence, required change, fix timing, tests, category, type, and confidence;
 - no HIGH/CRITICAL has low confidence;
 - every Question affects merge readiness;
