@@ -1,6 +1,6 @@
 ---
 name: production-java-backend-runtime
-description: Use this skill when building, modifying, reviewing, debugging, or testing production Java backend services, especially Spring Boot services, REST/gRPC APIs, messaging/event-driven flows, persistence, transactions, migrations, microservice contracts, observability, security, resilience, performance/load-sensitive paths, Docker/container behavior, or Kubernetes runtime-facing changes. Use it for codebases that require maintainable, testable, production-safe backend changes with bounded improvement of touched code, surface classification, risk-tiered planning, focused implementation passes, and honest verification.
+description: Use this skill for implementation, debugging, testing, refactoring, and self-review of production Java backend services, especially Spring Boot services, REST/gRPC APIs, messaging/event-driven flows, persistence, transactions, migrations, microservice contracts, observability, security, resilience, performance/load-sensitive paths, Docker/container behavior, or Kubernetes runtime-facing changes. For merge-gate PR/code-diff review, use `strict-backend-code-review` instead.
 ---
 
 # Production Java Backend Runtime Skill
@@ -8,6 +8,8 @@ description: Use this skill when building, modifying, reviewing, debugging, or t
 Use this skill for production-grade Java backend work where correctness, maintainability, testability, runtime safety, and bounded improvement matter.
 
 This skill is application-first and platform-aware, but not platform-owner. It applies to Java backend services and their runtime-facing artifacts when those artifacts live in the repository.
+
+This skill may self-review implementation work, but it is not the primary merge-gate PR/code-diff review skill. For review-only PR/code-diff verdicts, use `strict-backend-code-review`.
 
 ## When to use this skill
 
@@ -23,7 +25,7 @@ Use this skill for tasks involving:
 - Security: authn/authz, tenancy, object ownership, confidential data, sensitive data, runtime privileges.
 - Runtime-facing artifacts: Dockerfile, Helm, Kustomize, Kubernetes YAML, probes, resources, env/config/secrets.
 - Performance/load-sensitive changes: hot paths, high-throughput endpoints, large datasets, query shape, caching, serialization, concurrency, resource limits, JVM memory/GC, or SLO/cost impact.
-- Code review, debugging, refactoring, or tests in a Java backend repository.
+- Implementation self-review, debugging, refactoring, or tests in a Java backend repository.
 
 Do not use this skill as the primary guide for frontend, mobile, data science, generic DevOps/IaC ownership, or non-Java code unless the task directly affects a Java backend service.
 
@@ -89,7 +91,16 @@ One file can trigger multiple surfaces.
   authn/authz, ownership, tenancy, roles/scopes, secrets, confidential data, sensitive data, admin operations, or denied behavior.
 
 - Runtime/resilience:
-  Docker, Kubernetes, Helm/Kustomize, env/config/secrets, probes, resources, startup/shutdown, external calls, retries, timeouts, consumers, schedulers, jobs, idempotency, or duplicate delivery.
+  external calls, retries, timeouts, circuit breakers, rate limits, bulkheads, graceful degradation, consumers, schedulers, jobs, idempotency, duplicate delivery, or failure recovery.
+
+- Observability/runtime-health:
+  logs, metrics, traces, correlation/request IDs, audit logs, health endpoints, diagnostics, alert/dashboard-facing metrics, or failure visibility.
+
+- Kubernetes/container runtime:
+  Dockerfile, Helm, Kustomize, Kubernetes YAML, probes, resources, security context, env/config/secrets, ports, init jobs, or deployment behavior.
+
+- Architecture boundaries:
+  module/package boundaries, dependency direction, domain/application/infrastructure placement, ports/adapters, use-case boundaries, broad refactor, or architectural cleanup.
 
 - Performance/load:
   hot paths, large datasets, query shape, caching, serialization, allocation-heavy code, pools, backpressure, JVM memory/GC, resource limits, autoscaling signals, SLO/cost impact.
@@ -105,14 +116,15 @@ Before editing, classify the task:
   localized behavior change with clear tests and limited affected surface.
 
 - High-risk:
-  public contract, persistence/migration, transaction boundary, auth/security, tenant ownership, async/consumer/job behavior, external calls, Kubernetes/runtime config, performance/load-sensitive path, or broad refactor.
+  public contract, persistence/migration, transaction boundary, auth/security, tenant ownership, async/consumer/job behavior, external calls, observability/runtime-health behavior, Kubernetes/runtime config, performance/load-sensitive path, architecture boundary change, or broad refactor.
 
 For high-risk work:
 - build the relevant implementation artifacts;
 - load all references for triggered surfaces;
 - prefer test/reproduction before implementation;
-- run at least one meaningful verification command when available;
-- explicitly report unverified risks.
+- run the most relevant narrow verification for each high-risk triggered surface when available;
+- do not treat compile/static checks as sufficient proof for behavior, contract, data, security, runtime, observability, or performance changes;
+- if a meaningful check cannot be run, report the unverified risk explicitly.
 
 ## Implementation artifacts
 
@@ -131,7 +143,16 @@ Build compact artifacts internally when the corresponding surface is triggered. 
   `state/invariant -> transaction boundary -> query/schema/migration -> rollout/rollback impact -> tests`
 
 - Runtime map:
-  `trigger -> config/runtime artifact -> startup/readiness/shutdown/resource impact -> verification`
+  `trigger -> runtime path -> timeout/retry/idempotency/failure recovery -> verification`
+
+- Observability map:
+  `event/failure path -> log/metric/trace -> correlation -> cardinality/sensitive-data risk -> verification`
+
+- Kubernetes/container map:
+  `runtime artifact -> startup/readiness/shutdown -> resources/security/env/ports -> rollout impact -> verification`
+
+- Architecture map:
+  `boundary/change -> dependency direction -> domain/application/infrastructure placement -> scope/protection`
 
 - Security map:
   `caller -> identity -> permission/scope -> ownership/tenancy -> allowed/denied behavior -> tests`
@@ -259,10 +280,13 @@ Focused passes:
 - API/contracts pass -> compatibility, request/response semantics, generated clients, errors, versioning.
 - Data/migrations pass -> schema/data safety, transactions, rollout, rollback, data consistency.
 - Security/privacy pass -> authz/authn, ownership, tenancy, secret/sensitive-data exposure.
-- Runtime/resilience pass -> config, probes, resources, shutdown, retries, timeouts, idempotency.
+- Runtime/resilience pass -> external calls, retries, timeouts, circuit breakers, rate limits, graceful degradation, idempotency, failure recovery.
+- Observability/runtime-health pass -> logs, metrics, traces, health diagnostics, correlation continuity, cardinality, sensitive-data leakage.
+- Kubernetes/container runtime pass -> container startup, manifests, probes, resources, env/config/secrets, ports, security context, deployment behavior.
+- Architecture boundaries pass -> dependency direction, domain/application/infrastructure separation, use-case boundaries, refactoring scope.
 - Performance/load pass -> query shape, hot path cost, allocation, concurrency, backpressure, SLO/cost risk.
 
-Do not let a passing Java unit test suppress a triggered data, contract, security, runtime, or performance pass.
+Do not let a passing Java unit test suppress a triggered data, contract, security, runtime, observability, Kubernetes/container, architecture, or performance pass.
 
 ### 6. Verify narrow-first, then broaden
 
@@ -304,6 +328,8 @@ Before final response, check:
 - Observability.
 - Security.
 - Data/migration safety.
+- Kubernetes/container runtime impact.
+- Architecture boundaries.
 - Performance/load impact when relevant.
 - Refactoring scope and diff discipline.
 - Residual risks.
@@ -319,7 +345,8 @@ Load the corresponding reference for every triggered surface:
 - Tests and verification -> `references/testing.md`.
 - API/contracts -> `references/microservices-contracts.md`.
 - Data/migrations -> `references/data-transactions-migrations.md`.
-- Runtime/resilience -> `references/resilience.md` and/or `references/observability-runtime-health.md`.
+- Runtime/resilience -> `references/resilience.md`.
+- Observability/runtime-health -> `references/observability-runtime-health.md`.
 - Security/privacy -> `references/security.md`.
 - Architecture boundaries -> `references/clean-architecture-boundaries.md`.
 - Kubernetes/container runtime -> `references/kubernetes-container-runtime.md`.
