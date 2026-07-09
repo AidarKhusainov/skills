@@ -117,7 +117,8 @@ Valid evidence includes:
 - missing required test, contract, migration, config, manifest, or security rule;
 - repo-local convention from docs or recent local code;
 - applicable framework/runtime behavior;
-- realistic old/new version, retry, concurrency, rollout, or failure scenario.
+- realistic old/new version, retry, concurrency, rollout, or failure scenario;
+- focused-pass artifacts such as behavior map, proof map, schema-risk inventory, referential-constraint inventory, schema consistency table, operation matrix, contract-identifier/generator-impact scan, access-control trace, or state-transition view.
 
 Invalid evidence includes:
 - vague impressions;
@@ -271,7 +272,7 @@ Do not repeat every finding in Summary.
 
 ## Audit mode output
 
-When audit mode is requested, output normal review first, then compact coverage matrix.
+When audit mode is requested, output normal review first, then compact focused-pass coverage matrix.
 
 Coverage statuses:
 - Checked;
@@ -279,6 +280,12 @@ Coverage statuses:
 - Finding;
 - Question;
 - Not fully reviewable.
+
+For each triggered pass, include:
+- trigger evidence;
+- artifact built;
+- status;
+- finding/question references.
 
 Reference existing finding numbers.
 
@@ -290,6 +297,9 @@ Before final output, verify:
 - verdict and highest severity match findings;
 - APPROVE has no unresolved merge-relevant questions;
 - REQUEST_CHANGES is not used only for LOW/NIT/Optional/follow-up items;
+- every triggered focused pass was completed, marked not applicable, represented by a finding/question, or marked partial;
+- no focused pass was skipped because another domain produced a stronger finding;
+- required evidence artifacts were built internally when their focused passes were triggered;
 - every CRITICAL/HIGH/MEDIUM finding has type, confidence, evidence, required change, fix timing, tests, and category;
 - no HIGH/CRITICAL finding has low confidence;
 - every Verified finding has concrete evidence;

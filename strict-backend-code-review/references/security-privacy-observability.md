@@ -15,6 +15,20 @@ Check whether the PR preserves:
 - auditability of security-sensitive operations;
 - production diagnosability without sensitive-data leakage.
 
+## Access-control trace
+
+For changed endpoints, commands, background jobs, data access paths, or security-sensitive operations, build this internal trace before reporting findings:
+
+```text
+caller -> identity -> permission/scope -> tenant/object ownership -> allowed action -> denied behavior -> tests
+```
+
+Use it to check function-level access control, object-level authorization, tenant isolation, denied-path behavior, mass assignment, and security-sensitive side effects.
+
+A security finding must name attacker capability, protected asset, missing boundary, and concrete exploit path.
+
+Print the trace only in audit mode or when it is needed as evidence for a finding/question.
+
 ## Authentication and authorization
 
 Report when the PR:

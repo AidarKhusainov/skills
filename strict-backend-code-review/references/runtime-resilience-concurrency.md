@@ -14,6 +14,18 @@ Check whether the PR preserves:
 - concurrency safety;
 - operational diagnosability of runtime failures.
 
+## State-transition artifact
+
+For async, scheduled, consumer, retry, lock-sensitive, or multi-step runtime changes, build this internal view before reporting findings:
+
+```text
+trigger -> read state -> lock/constraint -> write state -> side effect -> ack/commit -> retry result
+```
+
+Use it to check duplicate delivery, concurrent execution, partial failure, stale state, retry after timeout, shutdown during work, and cross-pod behavior.
+
+Print the view only in audit mode or when it is needed as evidence for a finding/question.
+
 ## Kubernetes and runtime manifests
 
 Report when the PR:
