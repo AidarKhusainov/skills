@@ -23,6 +23,18 @@ Use environment-aware migration discipline:
 - Local/unmerged migrations may be edited or squashed only when there is clear evidence they have not been applied outside the current branch.
 - When uncertain, assume the migration is immutable.
 
+## Data change map
+
+For data-affecting changes, build this internal map:
+
+```text
+state/invariant -> transaction boundary -> query/schema/migration -> rollout/rollback impact -> verification
+```
+
+Use it to keep code, migration, transaction boundaries, data semantics, and tests aligned.
+
+Print the map only when it clarifies a migration/data-safety decision or final residual-risk note.
+
 ## Preferred approach
 
 For schema evolution:
