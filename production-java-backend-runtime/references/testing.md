@@ -13,6 +13,19 @@ Load this reference for behavior changes, bug fixes, refactoring, missing covera
 - Do not assert private implementation details unless they are the contract.
 - Do not add tests that merely assert mocks were called unless that interaction is the contract.
 - Do not weaken, delete, or skip tests to make a change pass without clear justification.
+- Do not treat compilation as behavior proof.
+
+## Proof map
+
+For non-trivial changes, build this internal map:
+
+```text
+changed behavior -> existing proof -> added/updated proof -> remaining gap
+```
+
+Use it to choose the smallest useful test level and to report what remains unverified.
+
+Print the map only when it clarifies the final response or a verification tradeoff.
 
 ## Preferred approach
 
