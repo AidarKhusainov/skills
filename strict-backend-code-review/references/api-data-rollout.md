@@ -4,6 +4,7 @@ Load this file only when the changed surface touches REST/gRPC APIs, DTOs, reque
 
 For SQL/DDL-specific review, also load `db-migrations-playbook.md`.
 For OpenAPI/protobuf/generated-contract review, also load `openapi-contract-playbook.md`.
+When a DB/migrations or OpenAPI/contracts focused pass is triggered, the corresponding playbook is mandatory, not optional background material.
 
 ## Review focus
 
