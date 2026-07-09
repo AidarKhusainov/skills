@@ -46,6 +46,16 @@ For schema evolution:
 - Consider lock time, table size, write load, and rollout order.
 - Include verification queries for risky changes.
 
+For relationship changes:
+
+- Verify database-engine-specific relationship/index behavior.
+- Do not assume supporting child-side access paths exist implicitly.
+- Verify cascade and referential actions against application ownership and retention semantics.
+
+For schema consistency:
+
+- Keep semantically equivalent columns and state markers consistent in type, nullability, default, precision, representation semantics, and constraints across related tables.
+
 For transactions:
 
 - Keep transaction boundaries explicit and small.
