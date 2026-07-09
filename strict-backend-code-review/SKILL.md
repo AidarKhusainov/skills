@@ -110,7 +110,7 @@ During each focused pass, review as the specialist accountable for that domain:
 
 - Java/Spring pass: senior Spring backend reviewer responsible for framework semantics, boundaries, transaction behavior, validation, persistence mapping, serialization, and maintainability.
 - Tests pass: test-design reviewer responsible for proving changed behavior, regressions, failure modes, and observable outcomes.
-- DB/migrations pass: PostgreSQL schema and migration safety reviewer responsible for data integrity, constraints, indexes, locks, rollout, rollback, and audit/history retention.
+- DB/migrations pass: database schema and migration safety reviewer responsible for data integrity, constraints, indexes, locks, rollout, rollback, and retention rules.
 - OpenAPI/contracts pass: external contract and generated-client reviewer responsible for status semantics, compatibility, schema stability, validation, and error shapes.
 - Security/privacy pass: application security reviewer responsible for authz/authn, ownership, tenant isolation, secret/PII exposure, and concrete attack paths.
 - Runtime/concurrency pass: SRE and distributed-systems reviewer responsible for rollout safety, probes, shutdown, retries, timeouts, backpressure, duplicate delivery, idempotency, locking, races, and diagnosability.
@@ -124,8 +124,8 @@ Required artifacts:
   `entry point -> validation -> auth -> domain decision -> transaction -> persistence -> side effect -> response/error`
 - Tests -> proof map:
   `changed behavior -> existing proof -> missing proof`
-- DB/migrations -> schema-risk inventory, FK inventory table, schema consistency table.
-- OpenAPI/contracts -> operation matrix, schema naming and generator-impact scan.
+- DB/migrations -> schema-risk inventory, referential-constraint inventory, schema consistency table.
+- OpenAPI/contracts -> operation matrix, contract-identifier and generator-impact scan.
 - Security/privacy -> access-control trace:
   `caller -> identity -> permission/scope -> tenant/object ownership -> allowed action -> denied behavior -> tests`
 - Runtime/concurrency -> state-transition view:
@@ -154,8 +154,8 @@ Do not load every reference by default.
 Load only when relevant:
 - `references/architecture-domain.md` — architecture, DDD, boundaries, aggregates, invariants, use cases.
 - `references/api-data-rollout.md` — APIs, DTOs, events, serialization, persistence, transactions, migrations, rollout/rollback.
-- `references/db-migrations-playbook.md` — DB schema consistency, FK/index support, constraints, cascade semantics, migration safety.
-- `references/openapi-contract-playbook.md` — OpenAPI operation matrix, response completeness, generated-client/schema naming, contract proof.
+- `references/db-migrations-playbook.md` — DB schema consistency, constraint/index support, referential actions, migration safety.
+- `references/openapi-contract-playbook.md` — OpenAPI operation matrix, response/status alignment, generated-client and public contract proof.
 - `references/security-privacy-observability.md` — authn/authz, tenant isolation, secrets, PII, audit, logs, metrics, traces.
 - `references/runtime-resilience-concurrency.md` — Kubernetes, probes, shutdown, external calls, retries, idempotency, locking, races.
 - `references/java-spring-testing-maintainability.md` — Java, Spring, JPA, validation, transactions, Jackson, tests, readability, simplicity.
