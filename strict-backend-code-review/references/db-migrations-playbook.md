@@ -19,7 +19,7 @@ Treat SQL and migrations as first-class code. Do not reduce this pass to Java pe
 
 ## Required artifacts
 
-Build these artifacts internally. Print them only in audit mode or when needed as evidence for a finding/question.
+Build these artifacts internally. Print them only in audit mode or when needed as evidence for a finding or unresolved question.
 
 ### Schema-risk inventory
 

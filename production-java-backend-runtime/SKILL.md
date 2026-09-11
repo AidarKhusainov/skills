@@ -1,6 +1,6 @@
 ---
 name: production-java-backend-runtime
-description: Use this skill for implementation, debugging, testing, refactoring, and self-review of production Java backend services, especially Spring Boot services, REST/gRPC APIs, messaging/event-driven flows, persistence, transactions, migrations, microservice contracts, observability, security, resilience, performance/load-sensitive paths, Docker/container behavior, or Kubernetes runtime-facing changes. For merge-gate PR/code-diff review, use `strict-backend-code-review` instead.
+description: Use this skill for implementation, debugging, testing, refactoring, self-review, and validation of review handoffs in production Java backend services, especially Spring Boot services, REST/gRPC APIs, messaging/event-driven flows, persistence, transactions, migrations, microservice contracts, observability, security, resilience, performance/load-sensitive paths, Docker/container behavior, or Kubernetes runtime-facing changes. For dedicated review-only PR/code-diff analysis, use `strict-backend-code-review` instead.
 ---
 
 # Production Java Backend Runtime Skill
@@ -9,7 +9,7 @@ Use this skill for production-grade Java backend work where correctness, maintai
 
 This skill is application-first and platform-aware, but not platform-owner. It applies to Java backend services and their runtime-facing artifacts when those artifacts live in the repository.
 
-This skill may self-review implementation work, but it is not the primary merge-gate PR/code-diff review skill. For review-only PR/code-diff verdicts, use `strict-backend-code-review`.
+This skill may self-review implementation work and independently validate review handoffs from `strict-backend-code-review`, but it is not the primary dedicated PR/code-diff review skill. For review-only analysis, use `strict-backend-code-review`.
 
 ## When to use this skill
 
@@ -25,9 +25,23 @@ Use this skill for tasks involving:
 - Security: authn/authz, tenancy, object ownership, confidential data, sensitive data, runtime privileges.
 - Runtime-facing artifacts: Dockerfile, Helm, Kustomize, Kubernetes YAML, probes, resources, env/config/secrets.
 - Performance/load-sensitive changes: hot paths, high-throughput endpoints, large datasets, query shape, caching, serialization, concurrency, resource limits, JVM memory/GC, or SLO/cost impact.
-- Implementation self-review, debugging, refactoring, or tests in a Java backend repository.
+- Review-handoff validation, implementation self-review, debugging, refactoring, or tests in a Java backend repository.
 
 Do not use this skill as the primary guide for frontend, mobile, data science, generic DevOps/IaC ownership, or non-Java code unless the task directly affects a Java backend service.
+
+## Review handoff
+
+When starting from output produced by `strict-backend-code-review`, this section defines a pre-implementation phase. Until implementation is explicitly authorized in step 6, its no-edit boundary takes precedence over the implementation workflow, stop rules, quality gates, and implementation final-response contract below.
+
+1. Re-check the current repository and task context; review output may be stale after subsequent changes.
+2. Independently validate each finding. Classify it as confirmed, rejected, or unresolved based on code, tests, task intent, configuration, and relevant framework/runtime behavior. Do not treat reviewer authority as proof. Preserve the original finding number and title in the validation result.
+3. For a rejected finding, explain the contradicting evidence. For an unresolved finding, state the missing evidence. Do not implement a fix for either state.
+4. Investigate `Unresolved questions` and `Review limitations` when the missing context is available. If the investigation establishes a concrete defect, treat it as a newly confirmed issue; if it disproves the risk, close the gap; otherwise keep it unresolved. Questions and limitations are not defects by themselves.
+5. For each confirmed issue, identify the root cause and recommend the best solution. Present alternatives only when materially different viable approaches exist, with the trade-offs that affect the decision.
+6. Do not modify code until validation is complete and the user explicitly approves the recommended approach or explicitly selects/provides a concrete implementation approach based on that validation. An earlier generic request to "fix the review findings" does not by itself satisfy this checkpoint.
+7. After authorization, follow the normal implementation, verification, and self-review workflow in this skill.
+
+Before implementation is authorized, report validation results for findings, unresolved questions, and review limitations, including relevant supporting or contradicting evidence or remaining gaps. For confirmed issues, recommend the best approach and include materially different alternatives only when useful. Do not use the implementation final-response contract before code changes begin.
 
 ## Operating principles
 
@@ -160,7 +174,7 @@ Build compact artifacts internally when the corresponding surface is triggered. 
 - Performance map:
   `hot path -> data size/cardinality -> query/allocation/concurrency/resource impact -> measurement or bounded reasoning`
 
-If an artifact cannot be built because required context is missing, ask a concise decision question before editing, implement the smallest safe reversible step, or explicitly report the residual risk.
+If an artifact cannot be built because required context is missing, ask a concise decision question or explicitly report the residual risk. After authorization, do not cross an unresolved stop-rule decision with a speculative change.
 
 ## Stop rules
 
@@ -174,7 +188,7 @@ Do not guess when the decision changes:
 - architecture boundaries, dependency direction, or module ownership;
 - performance/SLO tradeoff.
 
-When blocked by one of these, ask a concise decision question or implement the smallest safe reversible step.
+When blocked by one of these, ask a concise decision question. Do not edit across an unresolved stop-rule decision.
 
 ## Diff discipline
 
@@ -359,7 +373,7 @@ Done means:
 
 ## Final response contract
 
-Be concise and technical.
+After implementation, be concise and technical.
 
 Final response must include:
 

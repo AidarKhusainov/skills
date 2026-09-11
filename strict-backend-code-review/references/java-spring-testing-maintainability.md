@@ -24,7 +24,7 @@ entry point -> validation -> auth -> domain decision -> transaction -> persisten
 
 Use it to check changed branches, guards, exception paths, persistence effects, framework behavior, and response/error semantics.
 
-Print the map only in audit mode or when it is needed as evidence for a finding/question.
+Print the map only in audit mode or when it is needed as evidence for a finding or unresolved question.
 
 ## Spring components and dependency injection
 
@@ -49,7 +49,7 @@ Report when the PR:
 - uses read-only transactions while mutating state;
 - makes transaction boundary differ across equivalent entry points.
 
-Required change should identify the intended transactional boundary.
+Determine the intended transactional boundary and the state transition it must protect.
 
 ## Validation and binding
 
@@ -119,7 +119,7 @@ Before accepting tests, map changed branches/guards/invariants/failure/race path
 - lock/reload false paths: absent, stale, already processed, claim lost;
 - exception/rollback/retry/failure metrics and duplicate/concurrency/idempotency/ordering.
 
-Report a test finding when such a path protects domain/API/serialization/transaction/persistence/idempotency/failure observability without behavioral proof. Search tests by method/factory/enum/status/exception/side effect; if tests cannot run, mark partial and map statically.
+Report a test finding when such a path protects domain/API/serialization/transaction/persistence/idempotency/failure observability without behavioral proof. Search tests by method/factory/enum/status/exception/side effect; if tests cannot run, add a review limitation and map statically.
 
 Report when tests:
 - verify mocks instead of observable behavior for business-critical paths;

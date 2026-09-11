@@ -19,7 +19,7 @@ Treat machine-readable schemas as public contract inputs unless repo-local conte
 
 ## Required artifacts
 
-Build these artifacts internally. Print them only in audit mode or when needed as evidence for a finding/question.
+Build these artifacts internally. Print them only in audit mode or when needed as evidence for a finding or unresolved question.
 
 ### Operation matrix
 

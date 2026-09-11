@@ -39,7 +39,7 @@ Report when the PR:
 - uses database tables as an integration contract between contexts without explicit ownership;
 - adds cross-context calls without failure, authorization, and compatibility reasoning.
 
-Required change should restore ownership through an existing public API, application port, event contract, anti-corruption layer, or documented boundary.
+Identify the intended ownership boundary and the externally observable behavior that must remain intact.
 
 ## Domain model and invariants
 
@@ -66,8 +66,6 @@ Report when the PR:
 - lets repositories persist partially validated domain objects;
 - couples aggregate lifecycle to infrastructure-specific concerns.
 
-If the risk is distributed consistency, classify primarily as Data, Rollout / Compatibility, Resilience, or Concurrency when those are the main merge risk.
-
 ## Use cases and application services
 
 Report when the PR:
@@ -78,7 +76,7 @@ Report when the PR:
 - returns persistence entities or infrastructure objects from application boundaries;
 - makes application services own domain decisions that should belong to domain policy/aggregate.
 
-Required change should name the intended owner and the observable behavior that must be preserved.
+Identify the intended owner and the observable behavior that must be preserved.
 
 ## Domain language and naming
 

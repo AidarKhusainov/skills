@@ -27,7 +27,7 @@ Use it to check function-level access control, object-level authorization, tenan
 
 A security finding must name attacker capability, protected asset, missing boundary, and concrete exploit path.
 
-Print the trace only in audit mode or when it is needed as evidence for a finding/question.
+Print the trace only in audit mode or when it is needed as evidence for a finding or unresolved question.
 
 ## Authentication and authorization
 
@@ -42,7 +42,7 @@ Report when the PR:
 - creates admin/internal endpoints without network, identity, and authorization evidence;
 - changes service-to-service calls without caller identity or permission model.
 
-Required change should name the authorization boundary and denied behavior.
+Identify the authorization boundary and denied behavior required for the operation.
 
 ## Tenant isolation
 
@@ -78,7 +78,7 @@ Report when the PR:
 - exposes internal identifiers that can enable enumeration or correlation;
 - includes request/response bodies in logs/traces without redaction.
 
-Required change should minimize data exposure at source, not only hide it in UI.
+Check that sensitive-data exposure is minimized at the source, not only hidden in UI.
 
 ## Secrets and credentials
 
