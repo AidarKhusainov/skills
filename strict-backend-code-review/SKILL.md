@@ -1,6 +1,6 @@
 ---
 name: strict-backend-code-review
-description: Use for dedicated review-only discovery of concrete problems in Java/Spring backend PRs or code diffs, especially before merge or task completion. Covers correctness, architecture/DDD, contracts/data, security/privacy, runtime/resilience/concurrency, tests, and maintainability. Do not use to validate an existing review handoff or implement fixes; use `production-java-backend-runtime` for those tasks.
+description: Use for dedicated review-only discovery of concrete problems in Java/Spring backend PRs or code diffs, especially before merge or task completion. Covers correctness, architecture/DDD, contracts/data, security/privacy, runtime/resilience/concurrency, tests, and maintainability. Do not use to validate an existing review handoff or implement fixes; use `production-java-backend-development` for those tasks.
 metadata:
   version: "0.3.0"
 ---
@@ -11,7 +11,7 @@ This skill reviews Java/Spring backend PRs and code diffs for concrete problems 
 
 The output is a factual handoff for independent validation, not an implementation plan.
 
-Do not modify code. If the user also requests fixes, complete the review handoff first; validation, solution selection, and implementation belong to `production-java-backend-runtime`.
+Do not modify code. If the user also requests fixes, complete the review handoff first; validation, solution selection, and implementation belong to `production-java-backend-development`.
 
 ## Leading concepts
 
