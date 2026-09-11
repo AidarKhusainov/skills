@@ -1,112 +1,88 @@
 ---
 name: production-java-backend-development
-description: Use for implementing, debugging, testing, refactoring, self-review of implementation work, or validating review handoffs in production Java backend services. Covers Spring Boot, APIs/events, persistence/migrations, distributed failures, observability, security, architecture/domain boundaries, performance-sensitive paths, and service-owned container/Kubernetes changes. For dedicated review-only analysis of existing code, PRs, or diffs, use `strict-backend-code-review` instead.
+description: Use when implementing, debugging, refactoring, testing, or technically evaluating review findings in production Java/Spring backend code where domain/framework semantics, persistence, contracts, security, distributed behavior, runtime, or performance are material. Dedicated PR/diff review is out of scope.
 ---
 
 # Production Java Backend Development
 
-Use this skill to implement production Java backend changes safely and with bounded scope.
+This is a domain engineering skill for production Java/Spring backend work.
 
-It is application-first and platform-aware, but not a generic platform/IaC skill. For dedicated review-only analysis, use `strict-backend-code-review`.
+It defines backend constraints, decision gates, concern routing, and proof obligations. It does **not** own a generic software-development workflow. When a host workflow or process skill already governs brainstorming, planning, TDD sequencing, systematic debugging, worktrees, delegation, review reception, completion verification, or branch lifecycle, compose with that workflow instead of duplicating or contradicting it here.
 
-## Task authority
+It is application-first and platform-aware, but not a generic platform/IaC skill. For dedicated review-only analysis, use a specialist review skill such as `strict-backend-code-review` when that companion skill is available.
 
-Within applicable higher-priority constraints, explicit user instructions define the requested scope and authority; generic guidance in this skill does not expand or narrow an explicit request.
+## Composition boundary
 
-- Requests whose goal is analysis or verification—such as explain, review, diagnose, debug, inspect, test, verify, run, compile, or plan—are read-only unless the user also asks for repository changes.
-- Requests whose goal is to modify the repository—such as implement, change, fix, refactor, update, add, remove, or migrate—authorize in-scope reversible edits and relevant non-destructive verification without another approval.
-- When implementation is already requested, continue through implementation and verification rather than stopping after a plan or offering to continue.
-- Ask only when essential information or access is missing, or when an unresolved choice crosses a decision gate below.
+Apply this skill as the backend/domain layer inside the active task workflow.
 
-## Review handoff
+- Explicit user/repository instructions and documented decisions govern within higher-priority constraints.
+- If an explicit decision intentionally accepts a backend risk, preserve that decision and make the consequence explicit rather than silently overriding it.
+- Inferred or repeated local conventions are evidence, not authority; do not copy an unsafe pattern merely for consistency.
+- Generic workflow mechanics belong to the host or dedicated process skills.
+- This skill owns Java/backend semantic constraints and the backend-specific evidence needed to evaluate or justify a change.
+- Repository-local libraries, module rules, migration tooling, exact build commands, and intentional architecture/product trade-offs belong in `AGENTS.md` or equivalent project documentation.
 
-When the task starts from a handoff produced by `strict-backend-code-review`:
+If no dedicated process workflow is available, follow the repository's established workflow while still applying the domain constraints in this skill.
 
-1. Re-check the current repository and task context; the handoff may be stale.
-2. Independently classify each finding as `confirmed`, `rejected`, or `unresolved`. Preserve the original finding number/title when reporting validation.
-3. For rejected findings, cite the contradicting evidence. For unresolved findings, state the missing evidence. Do not fix either state.
-4. Investigate unresolved questions and review limitations when the missing context is available. A gap becomes a confirmed issue only when evidence establishes a concrete defect.
-5. If no confirmed handoff issue remains, no remediation is required for the handoff. Continue with any independently requested work; otherwise report the validation result and stop without code changes.
-6. If the user asked only for validation, report confirmed/rejected/unresolved states with relevant evidence or remaining gaps and stop.
-7. When the user requested a recommendation or implementation, identify the root cause of each confirmed issue and choose the smallest sound solution. Present alternatives only when materially different viable approaches exist.
-8. If the user requested fixes or implementation, validation is mandatory but does not require a second approval; continue with confirmed issues unless a decision gate below is reached. If the user requested only a recommendation, stop before editing.
+## Backend evaluation of review findings
 
-Reviewer authority is never proof, and a handoff never overrides current repository evidence.
+When the task includes review feedback, evaluate backend-related findings as technical input to the active review-reception workflow. This skill does not decide whether feedback is sufficiently understood, when implementation may begin, whether clarification must happen first, or the order in which accepted fixes are applied.
 
-## Workflow
+For each backend-related finding:
 
-### 1. Understand before editing
+1. Re-check the current repository and task context; the review may be stale or incomplete.
+2. Independently classify the finding as `confirmed`, `rejected`, or `unresolved` against current code, tests, configuration, backend invariants, and relevant references.
+3. For a rejected finding, provide the contradicting evidence. For an unresolved finding, state the missing evidence or ambiguity.
+4. Preserve the original finding number/title when available so the active workflow can map the evaluation back to the review.
+5. Treat unresolved questions or review limitations as confirmed defects only when additional evidence establishes a concrete problem.
 
-Inspect the smallest repository context needed to understand the requested behavior and existing constraints:
+Reviewer authority is never proof, and a review handoff never overrides current repository evidence. Return these backend evaluations to the active review-reception workflow; that workflow owns clarification gates, implementation readiness, sequencing, and response handling.
 
-- relevant code path and tests;
-- repo-local instructions such as `AGENTS.md`;
-- build files and verification commands;
-- affected API/event schemas, migrations, configuration, or runtime artifacts;
-- ADRs or domain documentation when the change touches an established boundary.
+## Applying the backend domain layer
 
-Prefer repository evidence over asking the user.
+### Establish the affected semantics
 
-### 2. Route material concerns
+Inspect only the repository context needed to determine what backend behavior and invariants are at risk. Depending on the change, that can include:
+
+- relevant code paths and tests;
+- API/event schemas and serialization;
+- persistence mappings, queries, migrations, and transaction boundaries;
+- configuration and service-owned runtime artifacts;
+- ADRs, domain documentation, and module/bounded-context rules;
+- security, tenancy, ownership, retry/idempotency, or performance constraints.
+
+Prefer repository evidence over assumptions.
+
+### Route material concerns
 
 Identify the concerns materially affected by the change and load only their references from the routing table below.
 
-A concern is material when its rules could change the implementation, verification, or residual risk. Do not load references merely because a file type technically matches.
+A concern is material when its rules could change the implementation choice, compatibility boundary, required proof, rollout safety, or residual risk. Do not load references merely because a file type technically matches.
 
-### 3. Plan the smallest safe change
+### Define backend-specific proof obligations
 
-For non-trivial work, form a short implementation plan around:
+Use `references/testing.md` to select the narrowest proof that still exercises the semantics at risk.
 
-- intended observable behavior;
-- smallest coherent vertical slice;
-- files or modules expected to change;
-- narrowest useful feedback loop;
-- materially affected concerns and compatibility/runtime risks.
+The proof level is a backend/domain decision; the sequencing of test-first development or generic completion verification belongs to the active process workflow.
 
-Do not create architecture ceremony or speculative abstractions. Follow reasonable repository conventions, but do not copy an unsafe local pattern merely for consistency.
+Examples:
 
-### 4. Implement feedback-loop-first
+- transaction, locking, dialect, constraint, or migration semantics may require a production-like database rather than repository mocks;
+- Spring wiring, serialization, validation, transaction proxies, or lifecycle behavior may require a Spring slice or integration boundary;
+- API/event compatibility must be checked against the actual externally visible representation and consumers' expectations;
+- messaging, retries, duplicate delivery, idempotency, and ack/commit ordering require proof at the failure boundary they depend on;
+- authorization, tenancy, and ownership changes require negative-path proof, not only happy-path access;
+- performance-sensitive changes require measurement representative of the claimed latency, throughput, allocation, saturation, or cost property.
 
-For behavior changes and bug fixes, prefer this order when practical:
+### Keep coupled backend artifacts aligned
 
-1. Reproduce or define the expected behavior.
-2. Add or update the narrowest useful behavioral proof.
-3. Make the smallest implementation change.
-4. Run the narrow check.
-5. Refactor only what is needed to keep the changed path clear, safe, and testable.
+When backend semantics change together, keep the relevant implementation, tests, schemas, migrations, configuration, runtime artifacts, and operational signals consistent with the same intended behavior.
 
-For changes that cannot reasonably be test-first, establish another executable feedback loop before broad editing.
-
-Keep behavior, tests, schemas, migrations, configuration, and runtime artifacts aligned when they change together. Avoid unrelated cleanup, package moves, mass renames, dependency upgrades, generated-file churn, or broad formatting changes.
-
-### 5. Verify proportionally to risk
-
-Discover commands from repository instructions, wrappers, build files, CI, and local docs. Prefer `./gradlew` over `gradle` and `./mvnw` over `mvn` when available.
-
-Verify narrow-first, then broaden only as justified:
-
-1. focused behavior or regression check;
-2. compile/static check for the touched module when useful;
-3. relevant integration/contract/migration/runtime/performance check;
-4. broader module or repository checks when the change warrants them.
-
-Compilation is not proof of behavioral, contract, data, security, distributed-runtime, or performance semantics.
-
-Never claim a check passed unless it ran and passed. Distinguish failures caused by the change from evidenced pre-existing failures.
-
-### 6. Self-review the final diff
-
-Before finishing:
-
-- confirm the requested behavior is implemented and no unrelated behavior changed;
-- inspect the final diff for accidental churn, debug code, temporary flags, dead code, or unused dependencies;
-- re-check every material concern using its loaded reference;
-- confirm tests and verification match the actual risk;
-- identify material residual uncertainty rather than hiding it.
+Avoid unrelated cleanup, broad renames, dependency upgrades, generated-file churn, or architecture migration unless they are required to make the requested change safe and coherent.
 
 ## Decision gates
 
-Do not guess when repository/task evidence does not determine a decision about:
+Do not invent a decision when neither current repository evidence nor explicit user/repository instructions determine:
 
 - externally visible product behavior;
 - an intentional breaking API/event/schema contract;
@@ -115,9 +91,9 @@ Do not guess when repository/task evidence does not determine a decision about:
 - irreversible external side effects or rollout sequencing with business impact;
 - a required SLO, latency, throughput, or cost target that materially changes the solution.
 
-Ask one concise decision question when such a choice is genuinely unresolved.
+If an explicit documented decision already resolves one of these trade-offs, preserve it and surface the backend consequence. Otherwise, return the unresolved decision to the active workflow rather than silently choosing product or operational policy.
 
-Do not escalate normal implementation choices such as class placement, internal abstractions, test level, dependency direction, transaction implementation, or local refactoring when repository evidence is sufficient to choose them safely.
+Normal internal implementation choices such as class placement, local abstractions, test level, dependency direction, transaction implementation, or focused refactoring should be derived from repository evidence and the relevant domain references when the safe choice is clear.
 
 ## Reference routing
 
@@ -125,7 +101,7 @@ Load only references for material concerns:
 
 - Java semantics, code structure, exceptions, mutability, concurrency, or abstraction cost -> `references/java-code-quality.md`.
 - Spring wiring, configuration, controllers, serialization, transactions, clients, or framework lifecycle -> `references/spring-boot.md`.
-- Behavioral proof, regression coverage, test level, flaky-risk, or verification strategy -> `references/testing.md`.
+- Backend proof level, regression coverage, framework/database integration, flaky-risk, or verification semantics -> `references/testing.md`.
 - Externally consumed API/event/message/schema/error semantics or compatibility -> `references/microservices-contracts.md`.
 - Persistence, queries, transactions, schema, migrations, indexes, constraints, backfills, or DB/event consistency -> `references/data-transactions-migrations.md`.
 - External calls, retries, timeouts, idempotency, messaging failure, degradation, or cascading-failure risk -> `references/resilience.md`.
@@ -141,15 +117,4 @@ When concerns overlap, use the owning reference for the core rule and the adjace
 
 Improve touched code only when the improvement directly supports the requested change by reducing implementation risk, clarifying the changed behavior, or making it meaningfully testable. Do not turn a focused task into cleanup of surrounding legacy code.
 
-Apply explicit repo-local instructions and architectural decisions before generic guidance unless they create correctness, security, data-integrity, compatibility, or production-runtime risk. Treat documented and repeated recent patterns as evidence of convention; do not preserve accidental legacy patterns when a local, low-risk correction is necessary for the requested change.
-
-## Final response
-
-After implementation, report concisely:
-
-- what changed and why;
-- checks actually run, including exact commands when available;
-- material behavior that could not be verified;
-- material residual risks or follow-up work, only when they exist.
-
-Do not report internal routing, loaded references, or procedural bookkeeping unless it explains a real limitation.
+Apply explicit user/repository instructions and documented architectural decisions before generic preferences. Treat inferred or repeated local patterns as evidence of convention, not authority; do not preserve accidental legacy patterns when a local, low-risk correction is necessary for the requested change.
