@@ -32,7 +32,7 @@ Report when the PR:
 - changes generated OpenAPI/schema output unintentionally;
 - changes API behavior through code but not contract/schema/docs when those are part of the project workflow.
 
-Required change should preserve compatibility, update the contract, or define a versioned/deprecated transition.
+Determine the compatibility invariant or externally observable contract behavior that must remain valid across the transition.
 
 Names that are part of generated/public contracts are not style-only. Review them for compatibility, reference stability, generated-client behavior, and tooling behavior.
 
@@ -90,7 +90,7 @@ Report when the PR:
 - catches exceptions in a way that prevents required rollback;
 - commits state before validation, authorization, or invariant checks complete.
 
-Required change should identify the transactional boundary and the state transition that must be atomic.
+Determine the transactional boundary and state transition that must remain atomic.
 
 ## Migration safety
 
@@ -119,8 +119,6 @@ Report when the PR:
 - adds feature flags without safe default or cleanup boundary;
 - cannot be rolled back after migration or external contract change;
 - needs operational sequencing but does not document it.
-
-Use Rollout / Compatibility as category when old/new version safety is the main merge risk.
 
 ## External clients and consumers
 

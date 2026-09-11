@@ -24,7 +24,7 @@ trigger -> read state -> lock/constraint -> write state -> side effect -> ack/co
 
 Use it to check duplicate delivery, concurrent execution, partial failure, stale state, retry after timeout, shutdown during work, and cross-pod behavior.
 
-Print the view only in audit mode or when it is needed as evidence for a finding/question.
+Print the view only in audit mode or when it is needed as evidence for a finding or unresolved question.
 
 ## Kubernetes and runtime manifests
 
@@ -48,8 +48,6 @@ Report when:
 - probe endpoint requires auth or depends on unstable downstream services without intent;
 - probe path/status changes but manifest is not updated;
 - long migration/cache warmup/indexing blocks readiness without operational plan.
-
-Use Kubernetes / Runtime when traffic routing, pod lifecycle, or deployment behavior is the main merge risk.
 
 ## Resources and capacity
 
@@ -75,7 +73,7 @@ Report when the PR:
 - changes client auth/TLS/headers without secret/config update;
 - adds dependency on critical path without metrics/tracing/error mapping.
 
-Required change should state timeout, retry, error mapping, and idempotency behavior.
+Check the timeout, retry, error-mapping, and idempotency behavior required by the affected path.
 
 ## Consumers, jobs, and schedulers
 
@@ -101,7 +99,7 @@ Report when the PR:
 - treats provider idempotency and local idempotency as interchangeable when both are needed;
 - does not define idempotency scope: event, command, business operation, or external call.
 
-Required change should specify durable key, transactional boundary, and expected duplicate outcome.
+Check the durable identity/key, transactional boundary, and expected duplicate outcome required by the affected operation.
 
 ## Concurrency and races
 
@@ -114,8 +112,6 @@ Report when the PR:
 - uses async execution without context propagation, error handling, or lifecycle control;
 - creates race between DB state, cache state, and emitted events;
 - changes cache invalidation in a way that can expose stale authorization or domain decisions.
-
-Use Concurrency when the primary risk is simultaneous execution corrupting correctness.
 
 ## Resilience patterns
 

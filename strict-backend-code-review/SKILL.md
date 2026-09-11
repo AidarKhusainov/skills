@@ -1,16 +1,17 @@
 ---
 name: strict-backend-code-review
-description: Use for review-only Java/Spring backend PR or code-diff review. Apply merge-gate review for correctness, architecture/DDD, API/data compatibility, security/privacy, Kubernetes/runtime readiness, resilience, tests, and maintainability using changed surface, focused passes, negative space, evidence gate, false-positive challenge, and deterministic verdict. Does not implement fixes or duplicate CI/linter/formatter output.
-version: 0.2.0
+description: Use for dedicated review-only discovery of concrete problems in Java/Spring backend PRs or code diffs, especially before merge or task completion. Covers correctness, architecture/DDD, contracts/data, security/privacy, runtime/resilience/concurrency, tests, and maintainability. Do not use to validate an existing review handoff or implement fixes; use `production-java-backend-runtime` for those tasks.
+metadata:
+  version: "0.3.0"
 ---
 
 # Strict Backend Code Review
 
-This skill is a merge-gate reviewer for Java/Spring backend PRs and code diffs.
+This skill reviews Java/Spring backend PRs and code diffs for concrete problems in the changed path.
 
-Output only evidence-based findings that affect safe merge, maintainability of the changed path, or meaningful review follow-up.
+The output is a factual handoff for independent validation, not an implementation plan.
 
-Do not modify code or produce a full implementation unless the user explicitly asks for a patch after the review.
+Do not modify code. If the user also requests fixes, complete the review handoff first; validation, solution selection, and implementation belong to `production-java-backend-runtime`.
 
 ## Leading concepts
 
@@ -30,17 +31,20 @@ Evidence gate:
 No finding survives without concrete, checkable evidence tied to changed surface.
 
 False-positive challenge:
-Before reporting CRITICAL, HIGH, or MEDIUM, try to disprove the finding using existing code, tests, config, framework behavior, deployment setup, and repo-local convention.
+Before reporting any finding, actively try to disprove it using existing code, tests, config, framework behavior, deployment setup, and repo-local convention.
 
-Merge gate:
-Verdict is derived mechanically from surviving findings.
+Finding threshold:
+Report a finding only when resolving it could materially change correctness, safety, contract behavior, architecture of the changed path, operability, testability, or maintainability. Omit preferences and improvements that would not justify follow-up work.
+
+Handoff boundary:
+A finding describes a problem and the observable state that should hold when it is resolved. It does not authorize code changes. The receiving agent independently validates the finding before solution analysis.
 
 ## Modes
 
 Default: Standard review.
 
 Parallel deep review:
-Use only when explicitly requested or when the PR is large, high-risk, multi-domain, and the host supports subagents or deep research. Split subagents by triggered focused pass. Parent reviewer must collect candidates, deduplicate by root cause, re-apply the evidence gate and false-positive challenge, derive severity/verdict, and produce one final review.
+Use only when explicitly requested or when the PR is large, high-risk, multi-domain, and the host supports subagents or deep research. Split subagents by triggered focused pass. Parent reviewer must collect candidates, deduplicate by root cause, re-apply the evidence gate, false-positive challenge, and finding threshold, and produce one final review.
 
 If subagents are unavailable, run the same focused passes sequentially in the main reviewer.
 
@@ -53,31 +57,28 @@ Use only when explicitly requested. Output normal review first, then compact foc
 2. Extract intent, scope, constraints, expected behavior, and risk surface.
 3. Build changed surface.
 4. Classify changed files, diff hunks, and implied surfaces using the surface classifier.
-5. Run every triggered focused pass. Do not review a multi-domain PR as one flat diff.
-6. Check negative space inside each triggered pass.
-7. Load references and playbooks required by triggered passes. Do not load unrelated references by default.
+5. Run every triggered focused pass and evaluate every triggered cross-cutting concern. Do not review a multi-domain PR as one flat diff.
+6. Check negative space inside each triggered pass and cross-cutting concern.
+7. Load references and playbooks required by triggered passes and cross-cutting concerns. Do not load unrelated references by default.
 8. Inspect repository context only to prove or disprove concrete risks.
-9. Audit changed behavior: map each merge-relevant changed branch, guard, validator, invariant, false/failure path, observable behavior, and race/idempotency path to proof: test, finding, question, N/A, or partial note.
-10. Apply evidence gate.
-11. Group findings by root cause.
-12. Apply false-positive challenge to CRITICAL/HIGH/MEDIUM.
-13. Derive verdict.
-14. Output the review.
+9. Audit changed behavior: map each review-relevant changed branch, guard, validator, invariant, false/failure path, observable behavior, and race/idempotency path to proof: test, finding, unresolved question, N/A, or review limitation.
+10. Apply evidence gate and false-positive challenge to every candidate.
+11. Apply the finding threshold.
+12. Group surviving findings by root cause.
+13. Output the review as a compact handoff.
 
 Completion criterion:
-Every triggered focused pass is checked, not applicable, finding, question, or not fully reviewable.
+Every triggered focused pass and cross-cutting concern is checked, not applicable, finding, unresolved question, or not fully reviewable.
 
-Do not print coverage unless audit mode is requested.
-
-Mark review partial if missing context or foundational blockers make important verification unreliable.
+Add a review limitation if missing context or foundational blockers make important verification unreliable.
 
 ## Surface classifier
 
 Before detailed review, classify changed files, hunks, and implied surfaces.
 
-A triggered pass is mandatory. Do not silently skip it, and do not let one strong finding suppress another domain pass.
+A triggered pass is mandatory. Do not silently skip it, and do not let a finding from one domain suppress another domain pass.
 
-One changed file can trigger multiple passes. Review each triggered domain separately, then merge only same-root-cause findings.
+One changed file can trigger multiple passes. Review each triggered domain separately.
 
 - Java/Spring pass:
   `src/main/java/**`, Spring controllers/services/configuration, validation, Jackson, transactions, JPA entities/repositories, or changed Java framework semantics.
@@ -92,17 +93,19 @@ One changed file can trigger multiple passes. Review each triggered domain separ
 - Runtime/concurrency pass:
   Kubernetes/Helm/manifests, config/env, probes, resources, external calls, retries, timeouts, circuit breakers, async jobs, consumers, schedulers, locks, idempotency, duplicate delivery, or race-prone state transitions.
 
+Architecture/DDD and observability are cross-cutting concerns, not separate focused passes. Evaluate them within affected passes, or directly when the concern is the only affected surface, whenever changed or implied surface touches architecture/domain ownership or boundaries, or logs/metrics/traces/audit/diagnostics/health/failure visibility.
+
 ## Focused passes
 
 When more than one domain is triggered, do not review the PR as one flat diff.
 
-Run each triggered focused pass independently, then deduplicate findings by root cause.
+Run each triggered focused pass independently.
 
 Each pass must either:
 - produce findings;
-- produce merge-relevant questions;
+- produce unresolved questions;
 - be explicitly checked with no finding in audit mode;
-- or mark the review partial if required evidence is unavailable.
+- or mark the review not fully reviewable if required evidence is unavailable.
 
 A pass may produce no findings. It must still inspect its own changed surface as first-class code.
 
@@ -133,9 +136,9 @@ Required artifacts:
 - Runtime/concurrency -> state-transition view:
   `trigger -> read state -> lock/constraint -> write state -> side effect -> ack/commit -> retry result`
 
-Do not print artifacts by default. Use them as internal evidence. Print compact artifacts only in audit mode or when needed to support a finding/question.
+Do not print artifacts by default. Use them as internal evidence. Print compact artifacts only in audit mode or when needed to support a finding or unresolved question.
 
-If an artifact cannot be built because necessary context is unavailable, mark the affected pass partial or turn the missing evidence into a merge-relevant Question.
+If an artifact cannot be built because necessary context is unavailable, add a review limitation or turn the missing evidence into an unresolved question.
 
 ## Context budget
 
@@ -149,24 +152,23 @@ Context priority:
 5. Repo-local instructions for the touched module.
 6. Broader search only for a concrete risk hypothesis.
 
-Stop expanding context when the risk is verified, disproven, not applicable, or remaining uncertainty should become a Question / partial review note.
+Stop expanding context when the risk is verified, disproven, not applicable, or remaining uncertainty should become an unresolved question or review limitation.
 
 ## Reference routing
 
 Do not load every reference by default.
 
-Load the corresponding reference for every triggered pass:
-- Architecture/DDD pass or architectural risk -> `references/architecture-domain.md`.
+Load the corresponding reference for every triggered pass or cross-cutting concern:
+- Architecture/DDD concern -> `references/architecture-domain.md`.
 - Java/Spring or Tests pass -> `references/java-spring-testing-maintainability.md`.
 - DB/migrations pass -> `references/db-migrations-playbook.md` and `references/api-data-rollout.md`.
 - OpenAPI/contracts pass -> `references/openapi-contract-playbook.md` and `references/api-data-rollout.md`.
-- Security/privacy or observability pass -> `references/security-privacy-observability.md`.
+- Security/privacy pass -> `references/security-privacy-observability.md`.
+- Observability concern -> `references/security-privacy-observability.md`.
 - Runtime/concurrency pass -> `references/runtime-resilience-concurrency.md`.
 - API/data/serialization/events/transactions/rollout compatibility risk -> `references/api-data-rollout.md`.
-- Review output, severity, confidence, verdict, audit mode, or self-check ambiguity -> `references/review-contract.md`.
+- Finding-vs-uncertainty, Problem/Evidence separation, Expected boundary, missing-test ambiguity, or constrained no-finding output -> `references/review-contract.md`.
 - Output examples only -> `references/examples.md`.
-
-Load `references/review-contract.md` before producing any non-clean review, audit output, or when checking whether a finding should affect verdict.
 
 ## Repo-local priority
 
@@ -199,7 +201,7 @@ Do not demand broad cleanup outside the changed area unless the PR cannot be mad
 
 Do not report PR size, mixed scope, or lack of atomicity as a standalone finding.
 
-If mixed scope creates correctness, security, data, rollout, or architecture risk, report the concrete underlying risk under the relevant category.
+If mixed scope creates correctness, security, data, rollout, or architecture risk, report the concrete underlying risk.
 
 Do not duplicate CI/linter/formatter/static-analysis/dependency-scanner output unless it reveals a non-obvious review root cause.
 
@@ -209,120 +211,88 @@ Review naming, readability, and simplicity only when they affect domain intent, 
 
 ## Finding rules
 
-Report every actionable, non-duplicate finding that survives scope gates, evidence gate, and false-positive challenge.
-
 Do not cap findings by count.
 
-One root cause = one finding, even if it appears in multiple locations.
+A published finding is an evidence-backed assertion, not a hypothesis or question. If evidence is insufficient, use `Unresolved questions` or `Review limitations`.
 
-Every finding must have severity, type, confidence, location, problem, evidence, required change, fix timing, tests, and category.
+Each finding contains, in order:
+1. Short factual title.
+2. `Location` — repository-relative file/line plus symbol when available, or another precise inspectable surface such as config, migration, or contract. Avoid workstation-specific absolute paths.
+3. `Problem` — what is wrong, why it matters, and enough concrete evidence for another agent to independently validate the claim.
+4. `Expected` — the observable behavior, invariant, contract, or state that should hold when the problem is resolved.
+5. `Evidence` — optional; use only when separating substantial proof improves clarity.
+6. `Validation` — optional; use only when a specific observable check materially helps prove resolution.
 
-Do not add a separate Impact field. Put impact inside Problem.
+Missing-test findings are valid for changed defensive contracts/invariants lacking behavioral proof when the proof gap itself crosses the finding threshold. Attach a test gap to the related finding when it is evidence for the same root cause.
 
-Use:
-- Verified finding when evidence directly proves the issue.
-- Risk hypothesis when risk is merge-relevant but not fully proven.
-- Question when the answer can change merge readiness.
+## Expected and validation
 
-If missing information blocks confidence in correctness, security, data safety, API compatibility, rollout safety, or architecture, report it as a Question finding with `Fix timing: Must fix in this PR`.
+`Expected` is outcome-oriented. Do not choose architecture, prescribe a patch, or provide suggested code. Leave solution analysis to the receiving agent.
 
-Missing-test findings are valid for changed defensive contracts/invariants lacking behavioral proof. Attach to the related finding; stand alone only when the untested contract is merge-relevant.
-
-## Required change and tests
-
-Required change must be observable, proportional, root-cause oriented, and sufficient for safe merge.
-
-Do not always ask for the smallest patch.
-
-Do not list alternatives without a preferred option or clear selection criterion.
-
-Suggested code is optional and must be local, precise, short, and non-speculative.
-
-Tests must name behavior/risk, test level, scenario, and expected observable result.
-
-Prefer black-box behavior tests through public use-case, API, contract, consumer, or integration boundaries when practical.
-
-Do not write generic test requests such as `Add tests`.
-
-`Tests: Not required` needs a concrete reason and is almost never acceptable for correctness, security, data, API, runtime, transaction, migration, concurrency, idempotency, or rollout findings.
-
-Do not create a separate missing-tests finding when the test gap belongs to another finding.
-
-## Verdict
-
-REQUEST_CHANGES:
-Any CRITICAL/HIGH/MEDIUM finding with `Fix timing: Must fix in this PR`.
-
-COMMENT_ONLY:
-Only LOW/NIT findings, Optional items, or Can be follow-up items.
-
-APPROVE:
-No findings, no merge-relevant questions, no useful non-blocking items.
-
-Do not APPROVE with unresolved merge-relevant questions.
-
-Do not REQUEST_CHANGES for preferences, NITs, optional cleanup, or follow-up-only items.
-
-`Highest severity` must equal the highest reported severity.
+`Validation` describes what observable behavior would prove resolution. Do not add it merely to fill the schema.
 
 ## Output
 
-Clean approve:
+Complete review with no findings, unresolved questions, or review limitations:
 
 ```text
-Verdict: APPROVE
-Highest severity: NONE
+No findings.
 ```
 
-Non-clean review:
+Review with findings:
 
 ```text
-Verdict: APPROVE | COMMENT_ONLY | REQUEST_CHANGES
-Highest severity: CRITICAL | HIGH | MEDIUM | LOW | NIT | NONE
-
-Review completeness: partial
-Reason: <only if partial>
-
-Summary:
-<omit for clean APPROVE; 1-3 sentences max>
-
 Findings:
-1. [SEVERITY][Verified finding | Risk hypothesis | Question][confidence]
+
+1. <short factual title>
    Location:
    Problem:
-   Evidence:
-   Required change:
-   Suggested code: <optional>
-   Fix timing: Must fix in this PR | Can be follow-up | Optional
-   Tests:
-   Category:
-   Subcategory:
+   Expected:
+   Evidence: <optional>
+   Validation: <optional>
 
-Questions:
-- <only merge-relevant questions not already represented as findings>
+Unresolved questions:
+- <only questions whose answer could materially change the review>
 
-Non-blocking:
-- <only useful LOW/NIT items>
+Review limitations:
+- <only unavailable context or verification that materially limits the review>
 ```
 
-Omit empty sections.
+Omit optional fields and empty sections.
 
-Do not output praise, positive notes, generic advice, process commentary, or ritual sections.
+If no finding survives but unresolved questions or review limitations remain, output those sections and end with `No findings in the reviewed scope.`
+
+Do not output praise, positive notes, generic advice, process commentary, or a summary that restates the findings.
+
+## Audit mode output
+
+When audit mode is requested, output normal review first, then compact focused-pass coverage matrix.
+
+Coverage statuses:
+- Checked;
+- Not applicable;
+- Finding;
+- Unresolved question;
+- Not fully reviewable.
+
+For each triggered focused pass and cross-cutting concern, include:
+- trigger evidence;
+- artifact built when applicable;
+- status;
+- finding/unresolved-question references.
+
+Reference existing finding numbers.
+
+Do not create duplicate findings from the matrix.
 
 ## Self-check
 
 Before returning:
-- verdict and highest severity match findings;
-- every triggered focused pass was completed, marked not applicable, represented by a finding/question, or marked partial;
-- no focused pass was skipped because another domain produced a stronger finding;
+- no focused pass was skipped because another domain already produced a finding;
 - required evidence artifacts were built internally when DB/migrations, OpenAPI/contracts, security/privacy, or runtime/concurrency passes were triggered;
-- CRITICAL/HIGH/MEDIUM findings have evidence, required change, fix timing, tests, category, type, and confidence;
-- no HIGH/CRITICAL has low confidence;
-- every Question affects merge readiness;
-- Required change is observable and root-cause oriented;
-- Tests are concrete or explicitly not required with reason;
-- findings are deduplicated by root cause;
-- no finding duplicates CI/linter/formatter output;
-- no unrelated legacy issue is reported;
-- changed guards/invariants/failure/race paths are mapped to proof: test, finding, question, N/A, or partial note;
-- clean APPROVE has no Summary.
+- every finding has a factual title, precise location, self-contained problem, and observable expected state;
+- optional Evidence or Validation adds information rather than repeating another field;
+- uncertainty is reported as an unresolved question or review limitation, not as a finding;
+- no finding duplicates CI/linter/formatter output or reports unrelated legacy code;
+- changed guards/invariants/failure/race paths are mapped to proof: test, finding, unresolved question, N/A, or review limitation;
+- output follows the compact handoff contract.
