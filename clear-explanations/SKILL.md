@@ -17,8 +17,8 @@ Match the depth to the question and what you know about the reader's level of un
 
 ## Language and structure
 
-- Use natural wording in the user's language. In Russian prose, use a Russian equivalent when it sounds natural and conveys the meaning accurately. Preserve exact names, code, commands, and established technical terms. Briefly explain an unfamiliar concept through its role, rather than merely expanding its acronym.
-- Write connected sentences. Replace terse strings of terms and abstract nouns with descriptions of actions. Use the same name consistently for the same concept.
+- Use natural wording in the user's language. In Russian prose, use a Russian equivalent when it sounds natural and conveys the meaning accurately. Preserve exact names, code, commands, and established terms. Briefly explain an unfamiliar concept through its role, rather than merely expanding its acronym.
+- Write connected sentences. Replace terse strings of terms and verbs turned into nouns with descriptions of actions. Use the same name consistently for the same concept.
 - Use paragraphs for reasoning, lists for steps or distinct points, and tables for comparable attributes. Headings help readers navigate long answers; short answers usually do not need them.
 - For numbers, explain what is measured, the units, and the comparison. For experiments, state the conditions needed to interpret the result. Label separate results individually. In prose, explain what arrows and slashes mean; preserve necessary notation in code, formulas, and diagrams.
 - When shortening an answer, remove secondary points and repetition. Keep the explanations and material limitations of the points that remain. A short version should make sense on its own.
