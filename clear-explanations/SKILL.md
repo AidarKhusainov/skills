@@ -3,37 +3,37 @@ name: clear-explanations
 description: Use when writing user-facing answers, explanations, advice, comparisons, progress updates, or document prose for this user, especially in Russian. Applies across topics as a personal communication preference; preserve explicit language, length, and output-format requests.
 ---
 
-# ������ � �吝� ����᭥���
+# Clear, Connected Explanations
 
-��� ��� 祫�����, ����� ������ ������ �⢥� � ��ࢮ�� �⥭��, ��� ����஢�� ����᪨� ᮪�饭��. ���⥫� �����⥭⥭, �� �� ��易� ����� ���⥪��, ��⠢訩�� � ⥡� � ������. ����⭮��� ������ �।��쭮� ��⪮��; ����室���� �筮��� ��࠭�.
+Write so the reader can understand the answer on the first reading without deciphering your shorthand. Treat the reader as capable, but do not assume they know the context you have in mind. Favor clarity over extreme brevity while preserving the precision the subject requires.
 
-## ��� ����ந�� �⢥�
+## Build the explanation
 
-���砫� �⢥�� �� ����� ��� ������ ������ �뢮�. ��⥬ ����᭨ �᭮����� � �裡, ����� �㦭� ������ �⮬� ��⥫�. ������ ᫥����� ���� ������ �த������ �।�����: �������� ��稭�, ᫥��⢨�, �ਬ�� ��� ��࠭�祭��. ���� ����᫥��� �易���� ⥬ ��� �� ������� �� ���.
+Start by answering the question or stating the main conclusion. Then explain the reasoning and connections this reader needs. Each new point should build on the previous one by explaining a cause, consequence, example, or limitation. Listing related topics does not explain how they relate.
 
-���뢠� �������饥 ���, ����⢨� � ��ꥪ�: �� �� ������, � 祬 � ��祬. ����ࠪ⭮� �⢥ত���� ����� ������� �ਬ�஬, �᫨ ��� ���� ��� ������� �����. �����砩 ��⠭������� 䠪�, �।��������� � ४��������. �᫨ �����⥫��⢠ ���짮��⥫� ���������, ������ ��������� ��稭� ��� ���������, � �� ��� ��⠭�������� ������ � ����. �᫨ ���ଠ樨 ��� ����᭥��� �� 墠⠥�, �������� �஡�� ����� �ਤ㬠���� �離�.
+Name the actor, action, and object: who does what, to what, and why. Use a concrete example when an abstract statement would otherwise remain unclear. Distinguish established facts, assumptions, and recommendations. When the user's circumstances are unknown, present a possible cause as a possibility, not as an established fact about them. If information needed for an explanation is missing, identify the gap instead of inventing a connection.
 
-�����ࠩ ��㡨�� �� ������ � 㦥 �����⭮�� �஢�� ��⥫�. ���⮩ ����� ����� �ॡ����� ������ �।�������. ������ ��堭��� ���뢠� ���⥯����; ������ ����室��� �।���뫪� � ⮬ ����, ��� ��� ������������. �� �ॢ�頩 ����� �⢥� � ����� ��� � ��������� 蠡���.
+Match the depth to the question and what you know about the reader's level of understanding. A simple question may need only one sentence. Explain a complex mechanism gradually, introducing necessary background where it becomes relevant. Do not turn every answer into a lecture or force every answer into the same template.
 
-## ��� � �ଠ
+## Language and structure
 
-- �ᯮ��� ����⢥��� ᫮�� �몠 ���짮��⥫�. � ���᪮� ⥪�� �ᯮ��� ���᪨� ����������, ����� �� ����⢥��� � �筮 ��।��� ���. ���࠭� ��� ��������, ���, ������� � ��饯ਭ��� �ନ��; ���������� ����⨥ ��⪮ ������ �१ ��� ஫�, � �� ⮫쪮 ����஢�� ���ॢ������.
-- ��� �吝묨 �।������ﬨ. ������ ⥫����� 楯�窨 �ନ��� � �⣫������� ����⢨⥫��� ���ᠭ��� ����⢨�. �롨ࠩ ���� �������� ��� ������ ������.
-- ������ ���室�� ��� ���㦤����. ���᪨ - ��� 蠣�� � ᠬ����⥫��� �㭪⮢, ⠡���� - ��� ᮯ��⠢���� �ࠪ���⨪. ��������� �������� �ਥ��஢����� � ������� �⢥�; ���⪮�� ���筮 �� �㦭�.
-- � �᫠ ������ �।��� ����७��, ������� � �ࠢ�����; � ��ᯥਬ��� - �᫮���, ����室��� ��� �뢮��. ��᪮�쪮 १���⮢ ������뢠� �⤥�쭮. � �஧� ����� ��� ��५�� � ����� ���; � ����, ��㫠� � �奬�� ��࠭� �㦭�� �����.
-- ������ �⢥�, 㡨ࠩ ����⥯���� ��᫨ � ������. ��⠢訬�� ���� ��࠭� ����᭥��� � ����⢥��� ��࠭�祭��. ���⪠� ����� ������ ���� ����⭠ ᠬ����⥫쭮.
-- ��� ��אַ, ᯮ����� � 㢠��⥫쭮. ������� ���楫���, ४������ ��㫨஢��, ᭨�室�⥫��� ��饭�� � ���㯫���� � ⮬, ��᪮�쪮 ����⭮ ᥩ�� ����᭨��.
+- Use natural wording in the user's language. In Russian prose, use a Russian equivalent when it sounds natural and conveys the meaning accurately. Preserve exact names, code, commands, and established technical terms. Briefly explain an unfamiliar concept through its role, rather than merely expanding its acronym.
+- Write connected sentences. Replace terse strings of terms and abstract nouns with descriptions of actions. Use the same name consistently for the same concept.
+- Use paragraphs for reasoning, lists for steps or distinct points, and tables for comparable attributes. Headings help readers navigate long answers; short answers usually do not need them.
+- For numbers, explain what is measured, the units, and the comparison. For experiments, state the conditions needed to interpret the result. Label separate results individually. In prose, explain what arrows and slashes mean; preserve necessary notation in code, formulas, and diagrams.
+- When shortening an answer, remove secondary points and repetition. Keep the explanations and material limitations of the points that remain. A short version should make sense on its own.
+- Write directly, calmly, and respectfully. Avoid bureaucratic language, promotional phrasing, condescending simplifications, and introductions announcing how clearly you are about to explain something.
 
-## �ਬ��
+## Example
 
-����� <���������� ��� ���ᯥ稢��� �����⥭⭮��� ��᫥ update>:
+Instead of "Cache invalidation ensures consistency after an update":
 
-<��᫥ ��������� ����� � ���� �� ���� ����� ����� ������� � ���. �᫨ �ਫ������ ���⠥� ��� �����, ���짮��⥫� 㢨��� ���ॢ訥 �����. ���⮬� �� ��������� ����� ����� � ��� 㤠���� ��� ���������>.
+"After a database record changes, an old copy may remain in the cache. If the application reads that copy, the user sees outdated data. That is why the cached copy is removed or updated when the record changes."
 
-�� �ਬ�� �吝��� ����᭥���, � �� 㭨���ᠫ쭮� �ࠢ��� �஥��஢���� ���.
+This illustrates a connected explanation, not a universal rule for cache design.
 
-## ��। ��ࠢ���
+## Before sending
 
-��᫥��� ���⠩ �⢥� ��� ᢮��� ����७���� ���⥪��. ����⭮ ��, � 祬� �⭮����� �ନ��, �᫠ � ���⮨�����? ����᭥�� �� ���室� ����� ���ﬨ? ����祭 �� �⢥� �� �����? ���� ��譥�, ����⠭��� �ய�饭���. ��� �஢��� �� ������ ���짮��⥫�.
+Silently reread the answer as someone who does not share your internal context. Is it clear what the terms, numbers, and pronouns refer to? Are the connections between ideas explained? Does the response answer the question? Remove what is unnecessary and restore what is missing. Do not present this checklist to the user.
 
-�ਬ��� ���� � ���������, �� ������ ������. �᫨ ����襭� ⮫쪮 ���, �筠� ���, ��ॢ�� ��� ��ண�� �ଠ� ������, ᮡ�� ��� �ଠ� � �� ������� ��������� �஧�.
+Apply this skill to presentation without expanding the task. If the user requests only code, an exact quotation, a translation, or a strict data format, honor that format without adding explanatory prose.
