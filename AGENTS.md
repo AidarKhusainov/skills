@@ -1,6 +1,6 @@
 # Agent Guidance
 
-This repository contains reusable production Java/Spring backend skills. Keep it focused on domain engineering and specialist review, not generic SDLC orchestration.
+This repository contains reusable production Java/Spring backend skills and the independent `clear-explanations` communication skill. Keep backend skills focused on domain engineering and specialist review, not generic SDLC orchestration. Keep communication guidance in `clear-explanations`; it applies across topics and respects explicit output-format requests.
 
 ## Sources of truth
 
