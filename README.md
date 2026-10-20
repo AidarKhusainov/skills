@@ -1,6 +1,8 @@
-# Production Java Backend Agent Skills
+# Agent Skills
 
-Domain-specific skills for agents working on production Java/Spring backend systems.
+Reusable skills for production Java/Spring backend work and clear explanations across topics.
+
+The backend responsibility layers and composition rules below apply to the two backend skills. `clear-explanations` is an independent communication skill.
 
 This repository intentionally does **not** own the complete software-development workflow. It composes with a host workflow or framework such as [Superpowers](https://github.com/obra/superpowers), while keeping Java/backend engineering policy and specialist review knowledge here.
 
@@ -27,6 +29,14 @@ It determines which backend semantics are at risk, which domain rules apply, wha
 Use for dedicated review-only analysis of Java/Spring diffs and PRs.
 
 It supplies backend issue discovery, focused passes, evidence validation, false-positive challenge, negative-space analysis, and finding thresholds. When the active host review workflow defines severity, recommendations, verdict, or output format, that host contract controls presentation.
+
+### `clear-explanations`
+
+Use for clear, connected explanations, answers, advice, comparisons, progress updates, and document prose across topics, especially in Russian.
+
+It explains necessary terms and numbers, makes relationships between ideas explicit, and adjusts detail to the question. Explicit language, length, code-only, quotation, and structured-output requests take precedence over prose preferences.
+
+The skill includes Codex UI metadata in `clear-explanations/agents/openai.yaml`. Invoke it as `$clear-explanations`; to make it a persistent preference, add a rule to your own `AGENTS.md` to apply it by default to user-facing explanations.
 
 ## Composition
 

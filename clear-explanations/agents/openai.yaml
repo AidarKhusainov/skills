@@ -1,0 +1,6 @@
+interface:
+  display_name: "Clear Explanations"
+  short_description: "Connected answers with clear wording and useful context"
+  default_prompt: "Use $clear-explanations to give a clear, connected answer with the context needed to understand it."
+policy:
+  allow_implicit_invocation: true
