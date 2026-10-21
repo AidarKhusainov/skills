@@ -1,8 +1,8 @@
 # Agent Skills
 
-Reusable skills for production Java/Spring backend work and clear explanations across topics.
+Reusable skills for production Java/Spring backend work, concise Use Case specifications, and clear explanations across topics.
 
-The backend responsibility layers and composition rules below apply to the two backend skills. `clear-explanations` is an independent communication skill.
+The backend responsibility layers and composition rules below apply to the two backend skills. `use-case-spec` and `clear-explanations` are independent specification-writing and communication skills.
 
 This repository intentionally does **not** own the complete software-development workflow. It composes with a host workflow or framework such as [Superpowers](https://github.com/obra/superpowers), while keeping Java/backend engineering policy and specialist review knowledge here.
 
@@ -38,6 +38,12 @@ It explains necessary terms and numbers, makes relationships between ideas expli
 
 The skill includes Codex UI metadata in `clear-explanations/agents/openai.yaml`. Invoke it as `$clear-explanations`; to make it a persistent preference, add a rule to your own `AGENTS.md` to apply it by default to user-facing explanations.
 
+### `use-case-spec`
+
+Use to prepare or refine concise functional specifications in a lightweight Use Case format. Each scenario records its entry point, relevant input/output fields, ordered main flow, and significant alternatives. The skill keeps unresolved decisions explicit and avoids duplicating existing contracts or turning a specification into an implementation plan.
+
+Invoke as `$use-case-spec`; the active host workflow still owns general requirements discovery and implementation.
+
 ## Composition
 
 ```text
@@ -65,6 +71,7 @@ Process frameworks may intentionally be stricter than Codex/OpenAI defaults. For
 | Concern | Owner |
 | --- | --- |
 | Requirements discovery, planning, generic debugging process | host workflow / Superpowers |
+| Concise functional specification / Use Case output format | `use-case-spec` |
 | Test-first sequencing and generic completion verification | host workflow / Superpowers |
 | Worktrees, delegation, branch completion | host workflow / Superpowers |
 | Review output format, severity, recommendations, verdict | active host review workflow when defined |
