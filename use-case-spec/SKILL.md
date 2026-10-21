@@ -22,7 +22,7 @@ Priority: **unambiguous behavior → essential completeness → readability → 
 Write the specification in the user's language. Use this structure, omitting genuinely empty optional sections:
 
 ```markdown
-# <Номер задачи>. <Название>
+# <Название задачи; номер укажи только при наличии>
 
 <Одно–два предложения: что меняется и зачем.>
 
@@ -69,7 +69,7 @@ Write the specification in the user's language. Use this structure, omitting gen
 
 ### Use Case boundaries and entry points
 
-- **One UC = one independently triggered process with a distinct goal and outcome.** Do not combine unrelated lifecycles or split trivial actions into separate UCs.
+- **One UC = one cohesive behavior scenario.** Separate independently meaningful modes with materially different flows, goals, results, or lifecycle triggers, even when they share an endpoint. Do not split trivial actions or routine error branches into separate UCs.
 - The **entry point** is required for every UC. Identify both the trigger and the actual interface/mechanism (HTTP method + path, message consumer, scheduled job, deployment hook, etc.). If not established, mark it as unresolved; do not invent an endpoint or handler.
 - Share contracts and rules across UCs only once. Introduce a named subordinate operation only if it materially improves readability.
 
